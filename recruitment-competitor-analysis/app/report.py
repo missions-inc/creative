@@ -17,7 +17,12 @@ from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
 from openpyxl.utils import get_column_letter
 from openpyxl.worksheet.worksheet import Worksheet
 
-from .config import ALLOWED_DOMAINS, FRESHNESS_DAYS, STANDARD_MONTHLY_HOURS
+from .config import (
+    ALLOWED_DOMAINS,
+    FRESHNESS_DAYS,
+    STANDARD_DAILY_HOURS,
+    STANDARD_MONTHLY_HOURS,
+)
 from .filters import ExcludedJob, MinWageInfo
 from .filters import client_category as _client_category
 from .schemas import ClientJob, CompetitorJob, SalarySample
@@ -219,7 +224,7 @@ def _hourly_formula(r: int, monthly_hours_ref: str) -> str:
     return (
         f'=IF(I{r}="","-",'
         f'IF(K{r}="時給",I{r},'
-        f'IF(K{r}="日給",I{r}/8,'
+        f'IF(K{r}="日給",I{r}/{STANDARD_DAILY_HOURS},'
         f'IF(K{r}="月給",I{r}/{monthly_hours_ref},'
         f'IF(K{r}="年収",I{r}/12/{monthly_hours_ref},"-")))))'
     )
@@ -445,7 +450,8 @@ def _build_summary_sheet(
     r += 1
     _set(ws, f"A{r}",
          "※ 月平均所定労働時間は月給→時給換算の前提値（週40時間×52週÷12ヶ月）。"
-         "青字セルを変更すると②シートの時給換算が再計算されます。日給は8時間/日で換算。",
+         "青字セルを変更すると②シートの時給換算が再計算されます。"
+         f"日給は{STANDARD_DAILY_HOURS}時間/日で換算。",
          font=F_SMALL)
 
     ws.column_dimensions["A"].width = 20
