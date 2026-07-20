@@ -33,7 +33,16 @@ APIキーは、ブラウザ画面のサイドバーで入力するか、環境�
 export ANTHROPIC_API_KEY="sk-ant-..."   # 環境変数で設定する場合
 ```
 
-## 使い方（ブラウザ）
+## Webアプリとして公開する（https のURLを発行）
+
+Streamlit Community Cloud（無料）にデプロイすると `https://〇〇〇.streamlit.app` の
+URLが発行され、社内メンバーがブラウザからそのまま利用できます。
+手順は **[DEPLOY.md](DEPLOY.md)** を参照してください（所要10分程度）。
+
+- APIキーはサーバー側（Secrets）に設定でき、メンバーの入力は不要になります
+- `APP_PASSWORD` を設定すると、パスワードを知る社内メンバーのみ利用できます
+
+## 使い方（ローカルPCのブラウザ）
 
 ```bash
 streamlit run streamlit_app.py

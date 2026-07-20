@@ -1,0 +1,3 @@
+# Streamlit Community Cloud はリポジトリ直下の requirements.txt を参照するため、
+# アプリ本体の依存定義（recruitment-competitor-analysis/requirements.txt）を読み込む
+-r recruitment-competitor-analysis/requirements.txt

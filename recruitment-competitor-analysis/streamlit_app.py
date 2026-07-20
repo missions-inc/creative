@@ -28,14 +28,44 @@ from app.research import find_competitors, sweep_market_segment
 
 st.set_page_config(page_title="採用競合・給与相場 分析ツール", page_icon="📊", layout="wide")
 
+
+def _secret(name: str) -> str:
+    """st.secrets から値を取得する（secrets.toml が無い環境でも安全に空文字を返す）"""
+    try:
+        return str(st.secrets.get(name, "") or "")
+    except Exception:
+        return ""
+
+
+# ---------------------------------------------------------------- パスワード保護
+# クラウド公開時は Secrets に APP_PASSWORD を設定すると、社内メンバーのみ
+# 利用できる簡易パスワードゲートが有効になる（未設定ならゲートなし）
+_app_password = _secret("APP_PASSWORD")
+if _app_password and not st.session_state.get("auth_ok"):
+    st.title("🔒 採用競合・給与相場 分析ツール")
+    pw = st.text_input("アプリパスワード", type="password")
+    if st.button("ログイン", type="primary"):
+        if pw == _app_password:
+            st.session_state["auth_ok"] = True
+            st.rerun()
+        else:
+            st.error("パスワードが違います。")
+    st.stop()
+
 # ---------------------------------------------------------------- サイドバー
+_preset_key = _secret("ANTHROPIC_API_KEY") or os.environ.get("ANTHROPIC_API_KEY", "")
+
 with st.sidebar:
     st.header("⚙️ 設定")
-    api_key_input = st.text_input(
-        "Anthropic APIキー",
-        type="password",
-        help="未入力の場合は環境変数 ANTHROPIC_API_KEY を使用します",
-    )
+    if _preset_key:
+        st.success("APIキーは設定済みです（管理者設定）")
+        api_key_input = ""
+    else:
+        api_key_input = st.text_input(
+            "Anthropic APIキー",
+            type="password",
+            help="管理者がサーバー側で設定済みの場合は入力不要です",
+        )
     st.divider()
     st.markdown(
         f"""**処理内容**
@@ -71,10 +101,11 @@ run = st.button("🔍 分析を実行", type="primary", disabled=not job_text.st
 
 
 def _get_client() -> anthropic.Anthropic:
-    key = api_key_input.strip() or os.environ.get("ANTHROPIC_API_KEY", "")
+    # 優先順位: サイドバー入力 > Secrets（クラウド管理者設定） > 環境変数
+    key = api_key_input.strip() or _preset_key
     if not key:
         st.error("Anthropic APIキーが設定されていません。サイドバーに入力するか、"
-                 "環境変数 ANTHROPIC_API_KEY を設定してください。")
+                 "Secrets／環境変数 ANTHROPIC_API_KEY を設定してください。")
         st.stop()
     return anthropic.Anthropic(api_key=key)
 
