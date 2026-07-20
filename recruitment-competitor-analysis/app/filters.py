@@ -143,7 +143,8 @@ def representative(sample: SalarySample) -> float:
 
 @dataclass
 class UnitStats:
-    unit: str
+    category: str  # 雇用区分（正社員／パート）
+    unit: str      # 給与単位（時給／月給など）
     count: int
     low: int       # 相場下限 = 各求人の下限給与の最小値
     mid: float     # 中央値 = 各求人の代表値の中央値
@@ -151,20 +152,32 @@ class UnitStats:
 
 
 def compute_stats(samples: Sequence[SalarySample]) -> List[UnitStats]:
-    """単位（時給/月給など）ごとに相場統計を算出する（コンソール表示用。
+    """雇用区分×給与単位ごとに相場統計を算出する（画面表示用。
     Excelレポート側では同じ計算を数式で行う）"""
     stats: List[UnitStats] = []
-    for unit in ("時給", "日給", "月給", "年収"):
-        group = [s for s in samples if s.salary_unit == unit]
-        if not group:
-            continue
-        stats.append(
-            UnitStats(
-                unit=unit,
-                count=len(group),
-                low=min(s.salary_min for s in group),
-                mid=median(representative(s) for s in group),
-                high=max((s.salary_max or s.salary_min) for s in group),
+    for category in ("正社員", "パート"):
+        for unit in ("時給", "日給", "月給", "年収"):
+            group = [
+                s for s in samples
+                if s.employment_category == category and s.salary_unit == unit
+            ]
+            if not group:
+                continue
+            stats.append(
+                UnitStats(
+                    category=category,
+                    unit=unit,
+                    count=len(group),
+                    low=min(s.salary_min for s in group),
+                    mid=median(representative(s) for s in group),
+                    high=max((s.salary_max or s.salary_min) for s in group),
+                )
             )
-        )
     return stats
+
+
+def client_category(employment_type: str) -> str:
+    """クライアントの雇用形態文字列を相場比較用の雇用区分に対応付ける"""
+    if any(k in employment_type for k in ("パート", "アルバイト", "非常勤")):
+        return "パート"
+    return "正社員"

@@ -15,9 +15,9 @@ from .config import (
     COMPETITOR_MAX_SEARCHES,
     FRESHNESS_DAYS,
     MARKET_MAX_SEARCHES,
-    MARKET_SAMPLE_TARGET,
+    SEGMENT_SAMPLE_TARGET,
 )
-from .schemas import ClientJob, CompetitorResult, MarketResult
+from .schemas import ClientJob, CompetitorResult, EmploymentCategory, MarketResult
 
 _SEARCH_SYSTEM = """あなたは日本の採用市場に詳しいリサーチャーです。
 求人情報の検索には Indeed（indeed.com）、ジョブメドレー（job-medley.com）、
@@ -77,21 +77,38 @@ def find_competitors(
     return extract_structured(client, instruction, report, CompetitorResult)
 
 
-def sweep_market_salaries(
-    client: anthropic.Anthropic, job: ClientJob, today: date
+_SEGMENT_SPEC: dict = {
+    "正社員": {
+        "search_terms": "「正社員」（契約社員などフルタイムの直接雇用を含む）",
+        "salary_note": "正社員求人は月給または年収表記が中心です。月給相場の算出に使うため、月給・年収の数値を正確に記録してください。",
+    },
+    "パート": {
+        "search_terms": "「パート・アルバイト」",
+        "salary_note": "パート求人は時給表記が中心です。時給相場の算出に使うため、時給の数値を正確に記録してください。",
+    },
+}
+
+
+def sweep_market_segment(
+    client: anthropic.Anthropic,
+    job: ClientJob,
+    today: date,
+    segment: EmploymentCategory,
 ) -> MarketResult:
-    """同職種・近隣エリアの給与サンプルを約100件収集する"""
+    """指定した雇用区分（正社員／パート）の給与サンプルを約50件収集する"""
+    spec = _SEGMENT_SPEC[segment]
     prompt = f"""給与相場の算出のため、求人の給与データを大量に収集してください。
 
 <対象条件>
 - 職種: {job.job_category}
 - エリア: {job.prefecture}{job.city} を中心に、同市内・同区内 → 近隣市区 の優先順位
-- 雇用形態: {job.employment_type} を優先（同職種であれば他形態も可、ただし単位を正確に記録）
+- 雇用区分: {spec['search_terms']} の求人のみを対象とする
 </対象条件>
 
 調査タスク（本日: {today.isoformat()}）:
 - Indeed / ジョブメドレー / ハローワークの検索結果一覧ページには多数の求人の給与が表示されます。
-  一覧ページを活用して効率よく、合計 {MARKET_SAMPLE_TARGET}件程度 の給与データを収集してください。
+  一覧ページを活用して効率よく、{SEGMENT_SAMPLE_TARGET}件程度 の給与データを収集してください。
+- {spec['salary_note']}
 - 1件ごとに: 識別ラベル（企業名 or タイトル要約） / 勤務地 / 給与下限 / 給与上限 / 単位（時給・日給・月給・年収） / 媒体 / URL（一覧ページのURLで可）
 - 同一求人の重複はカウントしない。給与が「非公開」「応相談」のものは含めない。
 - 明らかに古い求人（更新が{FRESHNESS_DAYS}日以上前と判明したもの）は含めない。
@@ -107,9 +124,10 @@ def sweep_market_salaries(
         max_tokens=32000,
     )
 
-    instruction = """以下の調査レポートから、給与サンプルを1件ずつ構造化データとして抽出してください。
+    instruction = f"""以下の調査レポートから、給与サンプルを1件ずつ構造化データとして抽出してください。
 - 給与は円の数値に変換する（時給1,200円 → 1200 / 月給23.5万円 → 235000）
 - レポートに記載された全サンプルを抽出し、省略しない
+- employment_category は全サンプル「{segment}」とする
 - 単位が判別できないサンプルは「不明」とする"""
 
     return extract_structured(

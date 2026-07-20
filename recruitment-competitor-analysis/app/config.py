@@ -16,8 +16,10 @@ FRESHNESS_DAYS = 30
 # 収集する競合求人の件数目安
 COMPETITOR_COUNT = 5
 
-# 給与相場の収集サンプル数目安
-MARKET_SAMPLE_TARGET = 100
+# 給与相場の収集サンプル数目安（雇用区分ごと）
+# 正社員 約50件（月給相場）＋ パート 約50件（時給相場）＝ 計 約100件
+SEGMENT_SAMPLE_TARGET = 50
+MARKET_SEGMENTS = ["正社員", "パート"]
 
 # 月給→時給換算に使う月平均所定労働時間（週40h × 52週 ÷ 12ヶ月 ≒ 173.8h）
 # ※最低賃金チェックおよびレポートの時給換算列で使用。レポート上にも明記される。
@@ -31,4 +33,4 @@ MONTHS_PER_YEAR = 12
 
 # Web検索の上限回数
 COMPETITOR_MAX_SEARCHES = 12
-MARKET_MAX_SEARCHES = 25
+MARKET_MAX_SEARCHES = 15  # 相場スイープ1セグメント（正社員／パート）あたり

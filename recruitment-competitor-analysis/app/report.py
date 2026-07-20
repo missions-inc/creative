@@ -19,6 +19,7 @@ from openpyxl.worksheet.worksheet import Worksheet
 
 from .config import ALLOWED_DOMAINS, FRESHNESS_DAYS, STANDARD_MONTHLY_HOURS
 from .filters import ExcludedJob, MinWageInfo
+from .filters import client_category as _client_category
 from .schemas import ClientJob, CompetitorJob, SalarySample
 
 # ---------------------------------------------------------------- スタイル定義
@@ -90,14 +91,19 @@ def _salary_text(min_v: Optional[int], max_v: Optional[int], unit: str) -> str:
 
 
 # ---------------------------------------------------------------- シート③
+CATEGORY_ORDER = ["正社員", "パート"]
+
+GroupKey = Tuple[str, str]  # (雇用区分, 給与単位)
+
+
 def _build_market_sheet(
     ws: Worksheet, samples: Sequence[SalarySample], dropped_count: int
-) -> Dict[str, Dict[str, str]]:
-    """給与相場データシートを作成し、単位ごとの統計セル番地を返す。
+) -> Dict[GroupKey, Dict[str, str]]:
+    """給与相場データシートを作成し、雇用区分×単位ごとの統計セル番地を返す。
 
-    返り値: {単位: {"count": "B5", "low": "C5", "mid": "D5", "high": "E5"}}
+    返り値: {(区分, 単位): {"count": "C5", "low": "D5", "mid": "E5", "high": "F5"}}
     """
-    ws.merge_cells("A1:I1")
+    ws.merge_cells("A1:J1")
     _set(ws, "A1", "③ 給与相場データ（同職種・近隣エリアの求人サンプル）",
          font=F_TITLE, fill=FILL_TITLE, align=CENTER)
     ws.row_dimensions[1].height = 24
@@ -105,47 +111,59 @@ def _build_market_sheet(
     # --- 統計サマリー ---
     _set(ws, "A3", "■ 相場統計（下記サンプルから数式で算出）", font=F_SECTION)
     stat_header_row = 4
-    headers = ["給与単位", "サンプル件数", "相場下限", "相場中央値", "相場上限"]
+    headers = ["雇用区分", "給与単位", "サンプル件数", "相場下限", "相場中央値", "相場上限"]
     for i, h in enumerate(headers, start=1):
         _set(ws, f"{get_column_letter(i)}{stat_header_row}", h,
              font=F_HEADER, fill=FILL_HEADER, align=CENTER, border=True)
 
-    # データはこの下に単位ごとに連続配置する。まず配置行を計算する。
-    ordered: List[SalarySample] = []
-    unit_ranges: Dict[str, Tuple[int, int]] = {}
-    units_present = [u for u in UNIT_ORDER if any(s.salary_unit == u for s in samples)]
+    # データはこの下に (区分, 単位) ごとに連続配置する。まず配置行を計算する。
+    groups_present: List[GroupKey] = [
+        (cat, unit)
+        for cat in CATEGORY_ORDER
+        for unit in UNIT_ORDER
+        if any(s.employment_category == cat and s.salary_unit == unit for s in samples)
+    ]
 
-    stats_rows = max(len(units_present), 1)
+    ordered: List[SalarySample] = []
+    group_ranges: Dict[GroupKey, Tuple[int, int]] = {}
+
+    stats_rows = max(len(groups_present), 1)
     note_row = stat_header_row + stats_rows + 1
     data_title_row = note_row + 2
     data_header_row = data_title_row + 1
     data_start = data_header_row + 1
 
     cursor = data_start
-    for unit in units_present:
-        group = [s for s in samples if s.salary_unit == unit]
+    for cat, unit in groups_present:
+        group = [
+            s for s in samples
+            if s.employment_category == cat and s.salary_unit == unit
+        ]
         group.sort(key=lambda s: s.salary_min)
-        unit_ranges[unit] = (cursor, cursor + len(group) - 1)
+        group_ranges[(cat, unit)] = (cursor, cursor + len(group) - 1)
         ordered.extend(group)
         cursor += len(group)
 
     # --- 統計行（数式） ---
-    stats_cells: Dict[str, Dict[str, str]] = {}
-    if units_present:
-        for i, unit in enumerate(units_present):
+    # データ列: F=給与下限, G=給与上限, H=代表値
+    stats_cells: Dict[GroupKey, Dict[str, str]] = {}
+    if groups_present:
+        for i, key in enumerate(groups_present):
+            cat, unit = key
             r = stat_header_row + 1 + i
-            r1, r2 = unit_ranges[unit]
-            _set(ws, f"A{r}", unit, font=F_BODY_BOLD, align=CENTER, border=True)
-            _set(ws, f"B{r}", f"=COUNT(E{r1}:E{r2})", font=F_BODY, align=CENTER,
+            r1, r2 = group_ranges[key]
+            _set(ws, f"A{r}", cat, font=F_BODY_BOLD, align=CENTER, border=True)
+            _set(ws, f"B{r}", unit, font=F_BODY_BOLD, align=CENTER, border=True)
+            _set(ws, f"C{r}", f"=COUNT(F{r1}:F{r2})", font=F_BODY, align=CENTER,
                  number_format='0"件"', border=True)
-            _set(ws, f"C{r}", f"=MIN(E{r1}:E{r2})", font=F_BODY_BOLD,
+            _set(ws, f"D{r}", f"=MIN(F{r1}:F{r2})", font=F_BODY_BOLD,
                  number_format=YEN, border=True)
-            _set(ws, f"D{r}", f"=MEDIAN(G{r1}:G{r2})", font=F_BODY_BOLD,
+            _set(ws, f"E{r}", f"=MEDIAN(H{r1}:H{r2})", font=F_BODY_BOLD,
                  number_format=YEN, border=True)
-            _set(ws, f"E{r}", f"=MAX(E{r1}:E{r2},F{r1}:F{r2})", font=F_BODY_BOLD,
+            _set(ws, f"F{r}", f"=MAX(F{r1}:F{r2},G{r1}:G{r2})", font=F_BODY_BOLD,
                  number_format=YEN, border=True)
-            stats_cells[unit] = {
-                "count": f"B{r}", "low": f"C{r}", "mid": f"D{r}", "high": f"E{r}",
+            stats_cells[key] = {
+                "count": f"C{r}", "low": f"D{r}", "mid": f"E{r}", "high": f"F{r}",
             }
     else:
         _set(ws, f"A{stat_header_row + 1}",
@@ -164,7 +182,7 @@ def _build_market_sheet(
          + "）",
          font=F_SECTION)
 
-    data_headers = ["No", "求人（企業名・タイトル）", "勤務地", "媒体",
+    data_headers = ["No", "求人（企業名・タイトル）", "雇用区分", "勤務地", "媒体",
                     "給与下限", "給与上限", "代表値", "単位", "出典URL"]
     for i, h in enumerate(data_headers, start=1):
         _set(ws, f"{get_column_letter(i)}{data_header_row}", h,
@@ -175,18 +193,20 @@ def _build_market_sheet(
         stripe = FILL_STRIPE if idx % 2 else None
         _set(ws, f"A{r}", idx + 1, font=F_BODY, fill=stripe, align=CENTER, border=True)
         _set(ws, f"B{r}", s.label, font=F_BODY, fill=stripe, align=WRAP, border=True)
-        _set(ws, f"C{r}", s.location, font=F_BODY, fill=stripe, align=WRAP, border=True)
-        _set(ws, f"D{r}", s.source_media, font=F_BODY, fill=stripe, align=CENTER, border=True)
-        _set(ws, f"E{r}", s.salary_min, font=F_BODY, fill=stripe,
+        _set(ws, f"C{r}", s.employment_category, font=F_BODY, fill=stripe,
+             align=CENTER, border=True)
+        _set(ws, f"D{r}", s.location, font=F_BODY, fill=stripe, align=WRAP, border=True)
+        _set(ws, f"E{r}", s.source_media, font=F_BODY, fill=stripe, align=CENTER, border=True)
+        _set(ws, f"F{r}", s.salary_min, font=F_BODY, fill=stripe,
              number_format=YEN, border=True)
-        _set(ws, f"F{r}", s.salary_max, font=F_BODY, fill=stripe,
+        _set(ws, f"G{r}", s.salary_max, font=F_BODY, fill=stripe,
              number_format=YEN, border=True)
-        _set(ws, f"G{r}", f'=IF(F{r}="",E{r},(E{r}+F{r})/2)', font=F_BODY,
+        _set(ws, f"H{r}", f'=IF(G{r}="",F{r},(F{r}+G{r})/2)', font=F_BODY,
              fill=stripe, number_format=YEN, border=True)
-        _set(ws, f"H{r}", s.salary_unit, font=F_BODY, fill=stripe, align=CENTER, border=True)
-        _set(ws, f"I{r}", s.url, font=F_SMALL, fill=stripe, align=WRAP, border=True)
+        _set(ws, f"I{r}", s.salary_unit, font=F_BODY, fill=stripe, align=CENTER, border=True)
+        _set(ws, f"J{r}", s.url, font=F_SMALL, fill=stripe, align=WRAP, border=True)
 
-    widths = [5, 34, 18, 12, 13, 13, 13, 8, 40]
+    widths = [5, 32, 10, 18, 12, 13, 13, 13, 8, 38]
     for i, w in enumerate(widths, start=1):
         ws.column_dimensions[get_column_letter(i)].width = w
     ws.freeze_panes = f"A{data_start}"
@@ -300,7 +320,7 @@ def _build_competitor_sheet(
 def _build_summary_sheet(
     ws: Worksheet,
     client_job: ClientJob,
-    stats_cells: Dict[str, Dict[str, str]],
+    stats_cells: Dict[GroupKey, Dict[str, str]],
     min_wage: MinWageInfo,
     today: date,
     sample_count: int,
@@ -309,7 +329,7 @@ def _build_summary_sheet(
     excluded_count: int,
 ) -> str:
     """サマリーシートを作成し、月平均所定労働時間セルの参照文字列を返す"""
-    span = 8
+    span = 9
     ws.merge_cells(start_row=1, start_column=1, end_row=1, end_column=span)
     _set(ws, "A1", "採用競合・給与相場 分析レポート", font=F_TITLE,
          fill=FILL_TITLE, align=CENTER)
@@ -340,41 +360,48 @@ def _build_summary_sheet(
 
     # --- 給与相場比較 ---
     r += 1
-    _section(ws, r, "■ 給与相場比較（③給与相場データシートより自動算出）", span)
+    _section(ws, r, "■ 給与相場比較（正社員＝月給ベース／パート＝時給ベース。③給与相場データシートより自動算出）", span)
     r += 1
     header_row = r
-    headers = ["給与単位", "件数", "相場下限", "相場中央値", "相場上限",
+    headers = ["雇用区分", "給与単位", "件数", "相場下限", "相場中央値", "相場上限",
                "クライアント下限", "クライアント上限", "相場ポジション"]
     for i, h in enumerate(headers, start=1):
         _set(ws, f"{get_column_letter(i)}{header_row}", h, font=F_HEADER,
              fill=FILL_HEADER, align=CENTER, border=True)
 
+    client_cat = _client_category(client_job.employment_type)
     if stats_cells:
-        for unit, cells in stats_cells.items():
+        for (cat, unit), cells in stats_cells.items():
             r += 1
-            _set(ws, f"A{r}", unit, font=F_BODY_BOLD, align=CENTER, border=True)
-            _set(ws, f"B{r}", f"='{SHEET3}'!{cells['count']}", font=F_LINK,
+            _set(ws, f"A{r}", cat, font=F_BODY_BOLD, align=CENTER, border=True)
+            _set(ws, f"B{r}", unit, font=F_BODY_BOLD, align=CENTER, border=True)
+            _set(ws, f"C{r}", f"='{SHEET3}'!{cells['count']}", font=F_LINK,
                  align=CENTER, number_format='0"件"', border=True)
-            _set(ws, f"C{r}", f"='{SHEET3}'!{cells['low']}", font=F_LINK,
+            _set(ws, f"D{r}", f"='{SHEET3}'!{cells['low']}", font=F_LINK,
                  number_format=YEN, border=True)
-            _set(ws, f"D{r}", f"='{SHEET3}'!{cells['mid']}", font=F_LINK,
+            _set(ws, f"E{r}", f"='{SHEET3}'!{cells['mid']}", font=F_LINK,
                  number_format=YEN, border=True)
-            _set(ws, f"E{r}", f"='{SHEET3}'!{cells['high']}", font=F_LINK,
+            _set(ws, f"F{r}", f"='{SHEET3}'!{cells['high']}", font=F_LINK,
                  number_format=YEN, border=True)
-            if unit == client_job.salary_unit and client_job.salary_min:
-                _set(ws, f"F{r}", client_job.salary_min, font=F_INPUT,
+            is_client_row = (
+                cat == client_cat
+                and unit == client_job.salary_unit
+                and client_job.salary_min
+            )
+            if is_client_row:
+                _set(ws, f"G{r}", client_job.salary_min, font=F_INPUT,
                      number_format=YEN, border=True)
-                _set(ws, f"G{r}", client_job.salary_max or client_job.salary_min,
+                _set(ws, f"H{r}", client_job.salary_max or client_job.salary_min,
                      font=F_INPUT, number_format=YEN, border=True)
                 # 代表値（下限と上限の中間）を相場と比較して判定
-                mid = f"(F{r}+G{r})/2"
-                _set(ws, f"H{r}",
-                     f'=IF({mid}>=E{r},"◎ 相場上限級",'
-                     f'IF({mid}>=D{r},"○ 中央値以上",'
-                     f'IF({mid}>=C{r},"△ 中央値未満","× 相場下限未満")))',
+                mid = f"(G{r}+H{r})/2"
+                _set(ws, f"I{r}",
+                     f'=IF({mid}>=F{r},"◎ 相場上限級",'
+                     f'IF({mid}>=E{r},"○ 中央値以上",'
+                     f'IF({mid}>=D{r},"△ 中央値未満","× 相場下限未満")))',
                      font=F_BODY_BOLD, align=CENTER, border=True)
             else:
-                for col in ("F", "G", "H"):
+                for col in ("G", "H", "I"):
                     _set(ws, f"{col}{r}", "-", font=F_BODY, align=CENTER, border=True)
     else:
         r += 1
@@ -422,15 +449,15 @@ def _build_summary_sheet(
          font=F_SMALL)
 
     ws.column_dimensions["A"].width = 20
-    for col in "BCDEFGH":
-        ws.column_dimensions[col].width = 15
+    for col in "BCDEFGHI":
+        ws.column_dimensions[col].width = 14
 
     return f"'{SHEET1}'!$B${monthly_hours_row}"
 
 
 # ---------------------------------------------------------------- エントリポイント
 def build_report(
-    output_path: str,
+    output_path,  # ファイルパス（str）または file-like オブジェクト（io.BytesIO 等）
     client_job: ClientJob,
     competitors: Sequence[CompetitorJob],
     excluded: Sequence[ExcludedJob],

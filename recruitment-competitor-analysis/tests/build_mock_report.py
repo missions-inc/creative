@@ -12,6 +12,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from app.filters import (  # noqa: E402
     MinWageInfo,
+    compute_stats,
     filter_competitors,
     filter_samples,
 )
@@ -83,24 +84,40 @@ competitors_raw = [
 
 random.seed(42)
 samples_raw = []
-for i in range(90):
+
+# 正社員セグメント: 月給50件（うち年収表記2件）
+for i in range(48):
     lo = random.randrange(205000, 275000, 5000)  # 時給換算で最低賃金を上回る範囲
     samples_raw.append(SalarySample(
-        label=f"モック法人{i + 1}", location="横浜市青葉区",
+        label=f"モック法人{i + 1}", employment_category="正社員",
+        location="横浜市青葉区",
         salary_min=lo, salary_max=lo + random.randrange(20000, 60000, 5000),
-        salary_unit="月給", source_media=random.choice(["Indeed", "ジョブメドレー", "ハローワーク"]),
+        salary_unit="月給",
+        source_media=random.choice(["Indeed", "ジョブメドレー", "ハローワーク"]),
         url="https://jp.indeed.com/mock-list",
     ))
-for i in range(12):
+for i in range(2):
+    samples_raw.append(SalarySample(
+        label=f"モック法人（年収）{i + 1}", employment_category="正社員",
+        location="横浜市青葉区",
+        salary_min=3200000, salary_max=4200000, salary_unit="年収",
+        source_media="Indeed", url="https://jp.indeed.com/mock-list",
+    ))
+
+# パートセグメント: 時給50件
+for i in range(50):
     lo = random.randrange(1170, 1500, 10)  # 最低賃金(1162円)以上の範囲
     samples_raw.append(SalarySample(
-        label=f"モックパート{i + 1}", location="横浜市青葉区",
+        label=f"モックパート{i + 1}", employment_category="パート",
+        location="横浜市青葉区",
         salary_min=lo, salary_max=(lo + 200) if i % 3 else None, salary_unit="時給",
         source_media="ジョブメドレー", url="https://job-medley.com/mock-list",
     ))
+
 # 除外対象になる最低賃金未満サンプル
 samples_raw.append(SalarySample(
-    label="モック低賃金", location="横浜市青葉区", salary_min=1000, salary_max=None,
+    label="モック低賃金", employment_category="パート",
+    location="横浜市青葉区", salary_min=1000, salary_max=None,
     salary_unit="時給", source_media="ハローワーク",
     url="https://kyujin.hellowork.mhlw.go.jp/mock",
 ))
@@ -111,6 +128,10 @@ samples, dropped = filter_samples(samples_raw, min_wage.hourly)
 
 assert len(excluded) == 2, f"除外は2件のはず: {len(excluded)}"
 assert dropped == 1, f"サンプル除外は1件のはず: {dropped}"
+
+stats = compute_stats(samples)
+keys = {(s.category, s.unit) for s in stats}
+assert ("正社員", "月給") in keys and ("正社員", "年収") in keys and ("パート", "時給") in keys, keys
 
 out = sys.argv[1] if len(sys.argv) > 1 else "mock_report.xlsx"
 build_report(
@@ -123,4 +144,6 @@ build_report(
     min_wage=min_wage,
     today=TODAY,
 )
+for s in stats:
+    print(f"[{s.category}×{s.unit}] {s.count}件  下限 {s.low:,} / 中央値 {s.mid:,.0f} / 上限 {s.high:,}")
 print(f"OK: {out} （競合{len(competitors)}件・除外{len(excluded)}件・サンプル{len(samples)}件）")

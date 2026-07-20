@@ -6,6 +6,7 @@ from pydantic import BaseModel, Field
 
 SalaryUnit = Literal["時給", "日給", "月給", "年収", "不明"]
 SourceMedia = Literal["Indeed", "ジョブメドレー", "ハローワーク"]
+EmploymentCategory = Literal["正社員", "パート"]
 
 
 class ClientJob(BaseModel):
@@ -59,6 +60,9 @@ class SalarySample(BaseModel):
     """給与相場算出用のサンプル1件"""
 
     label: str = Field(description="求人の識別ラベル（企業名や求人タイトルの要約）")
+    employment_category: EmploymentCategory = Field(
+        description="雇用区分。正社員（契約社員含むフルタイム）または パート（アルバイト含む）"
+    )
     location: str = Field(description="勤務地（市区町村まで）")
     salary_min: int = Field(description="給与下限（円、数値）")
     salary_max: Optional[int] = Field(description="給与上限（円、数値）。単一提示ならnull")

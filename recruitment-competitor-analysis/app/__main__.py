@@ -10,10 +10,11 @@ from datetime import date
 from pathlib import Path
 
 from .claude_client import get_client
+from .config import MARKET_SEGMENTS, SEGMENT_SAMPLE_TARGET
 from .filters import compute_stats, filter_competitors, filter_samples, resolve_min_wage
 from .parser import parse_client_job
 from .report import build_report
-from .research import find_competitors, sweep_market_salaries
+from .research import find_competitors, sweep_market_segment
 
 
 def main() -> int:
@@ -50,13 +51,19 @@ def main() -> int:
     if excluded:
         print(f"   除外 {len(excluded)}件（最低賃金未満・更新30日超）")
 
-    print("③ 給与相場データを収集しています（約100件・数分かかります）...")
-    market_result = sweep_market_salaries(client, job, today)
-    samples, dropped = filter_samples(market_result.samples, min_wage.hourly)
+    print(f"③ 給与相場データを収集しています（正社員 約{SEGMENT_SAMPLE_TARGET}件 ＋ "
+          f"パート 約{SEGMENT_SAMPLE_TARGET}件・数分かかります）...")
+    raw_samples = []
+    for segment in MARKET_SEGMENTS:
+        print(f"   [{segment}] 検索中...")
+        result = sweep_market_segment(client, job, today, segment)
+        print(f"   [{segment}] {len(result.samples)}件を取得")
+        raw_samples.extend(result.samples)
+    samples, dropped = filter_samples(raw_samples, min_wage.hourly)
     print(f"   サンプル {len(samples)}件を採用（除外 {dropped}件）")
 
     for st in compute_stats(samples):
-        print(f"   [{st.unit}] {st.count}件  下限 {st.low:,}円 ／ "
+        print(f"   [{st.category}×{st.unit}] {st.count}件  下限 {st.low:,}円 ／ "
               f"中央値 {st.mid:,.0f}円 ／ 上限 {st.high:,}円")
 
     print("④ Excelレポートを作成しています...")
