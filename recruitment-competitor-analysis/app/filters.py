@@ -86,8 +86,11 @@ def filter_competitors(
     excluded: List[ExcludedJob] = []
 
     for job in jobs:
-        # ルール1: 最低賃金チェック（換算不能な場合は除外しない）
-        hourly = to_hourly(job.salary_min, job.salary_unit)
+        # ルール1: 最低賃金チェック
+        # 時給求人のみ厳密に判定する。月給・年収・日給は所定/実働労働時間が
+        # 求人ごとに異なり時給換算が不正確なため（例: 月給18万円台の正社員は
+        # 介護業界では通常水準で最低賃金違反ではない）、誤除外を避けて対象外とする。
+        hourly = to_hourly(job.salary_min, job.salary_unit) if job.salary_unit == "時給" else None
         if hourly is not None and hourly < min_wage_hourly:
             excluded.append(
                 ExcludedJob(
@@ -126,7 +129,8 @@ def filter_samples(
         if s.salary_unit == "不明":
             dropped += 1
             continue
-        hourly = to_hourly(s.salary_min, s.salary_unit)
+        # 最低賃金チェックは時給求人のみ（月給・年収・日給は時給換算が不正確なため対象外）
+        hourly = to_hourly(s.salary_min, s.salary_unit) if s.salary_unit == "時給" else None
         if hourly is not None and hourly < min_wage_hourly:
             dropped += 1
             continue
