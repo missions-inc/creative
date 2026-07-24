@@ -149,6 +149,28 @@ header{
   .logo-text strong span{display:inline-block;}
 }
 
+/* ---------- イラスト共通 ---------- */
+.svg-defs{position:absolute;width:0;height:0;overflow:hidden;}
+.photo-ph{padding:14px;}
+.photo-ph .scene{width:100%;height:100%;}
+.photo-ph .scene-cap{
+  position:absolute;bottom:10px;left:50%;transform:translateX(-50%);
+  background:rgba(255,255,255,.82);color:var(--c-main-dark);font-weight:900;
+  font-size:12px;border-radius:50px;padding:4px 14px;white-space:nowrap;
+}
+.hero-illust{margin-top:8px;display:flex;justify-content:center;}
+.hero-scene{width:min(480px,96%);height:auto;filter:drop-shadow(0 6px 6px rgba(190,140,50,.16));}
+.hero-scene .bob{animation:bounce 2.8s ease-in-out infinite;transform-box:fill-box;transform-origin:center;}
+.hero-scene .bob2{animation:bounce 2.8s ease-in-out .5s infinite;transform-box:fill-box;transform-origin:center;}
+.msg-photo .bust{width:96%;height:96%;position:absolute;bottom:-4%;left:2%;}
+.voice .who{position:relative;}
+.voice-ava{
+  width:46px;height:46px;border-radius:50%;flex-shrink:0;overflow:hidden;
+  background:linear-gradient(135deg,#FFE9C4,#FFD9E2);border:2px solid #fff;box-shadow:var(--shadow);
+}
+.voice .who::before{content:none !important;}
+.voice-ava svg{width:100%;height:100%;display:block;}
+
 /* ---------- ヒーロー ---------- */
 .hero{
   background:
@@ -623,6 +645,145 @@ footer .copy{font-size:11px;opacity:.85;}
 </head>
 <body>
 
+<!-- ============ イラスト部品（SVGシンボル） ============ -->
+<svg class="svg-defs" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- 女性保育士（バスト） -->
+    <symbol id="ill-teacher" viewBox="0 0 120 124">
+      <path d="M14 124 Q16 80 60 76 Q104 80 106 124 Z" fill="#4FC3B5"/>
+      <path d="M60 76 Q40 78 30 90 L30 124 L46 124 L48 92 Z" fill="#39B0A3"/>
+      <path d="M60 76 Q80 78 90 90 L90 124 L74 124 L72 92 Z" fill="#39B0A3"/>
+      <path d="M46 78 L60 94 L74 78 Q67 74 60 74 Q53 74 46 78 Z" fill="#fff"/>
+      <path d="M50 86 h20 v14 a10 10 0 0 1 -20 0 Z" fill="#fff" opacity=".85"/>
+      <rect x="52" y="60" width="16" height="20" rx="8" fill="#F3C39A"/>
+      <path d="M24 54 Q22 10 60 10 Q98 10 96 54 Q96 70 88 76 L84 48 Q60 38 36 48 L32 76 Q24 70 24 54 Z" fill="#7A5138"/>
+      <circle cx="60" cy="46" r="30" fill="#FCD9B6"/>
+      <circle cx="31" cy="49" r="6" fill="#FCD9B6"/>
+      <circle cx="89" cy="49" r="6" fill="#FCD9B6"/>
+      <path d="M31 40 Q33 15 60 15 Q87 15 89 40 Q80 29 60 29 Q47 29 43 40 Q40 33 36 40 Z" fill="#7A5138"/>
+      <path d="M31 40 Q29 56 34 64 L40 61 Q35 51 37 40 Z" fill="#7A5138"/>
+      <path d="M89 40 Q91 56 86 64 L80 61 Q85 51 83 40 Z" fill="#7A5138"/>
+      <path d="M44 41 Q49 39 54 41" stroke="#5A4632" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+      <path d="M66 41 Q71 39 76 41" stroke="#5A4632" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+      <ellipse cx="50" cy="49" rx="3.3" ry="4" fill="#5A4632"/>
+      <ellipse cx="70" cy="49" rx="3.3" ry="4" fill="#5A4632"/>
+      <circle cx="51.2" cy="47.6" r="1.1" fill="#fff"/>
+      <circle cx="71.2" cy="47.6" r="1.1" fill="#fff"/>
+      <circle cx="41" cy="57" r="5" fill="#FBB0A2" opacity=".8"/>
+      <circle cx="79" cy="57" r="5" fill="#FBB0A2" opacity=".8"/>
+      <path d="M52 58 Q60 65 68 58" stroke="#5A4632" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+    </symbol>
+
+    <!-- 女性保育士（別カラー・ピンクエプロン） -->
+    <symbol id="ill-teacher-p" viewBox="0 0 120 124">
+      <path d="M14 124 Q16 80 60 76 Q104 80 106 124 Z" fill="#F5A9BC"/>
+      <path d="M60 76 Q40 78 30 90 L30 124 L46 124 L48 92 Z" fill="#EE8FA6"/>
+      <path d="M60 76 Q80 78 90 90 L90 124 L74 124 L72 92 Z" fill="#EE8FA6"/>
+      <path d="M46 78 L60 94 L74 78 Q67 74 60 74 Q53 74 46 78 Z" fill="#fff"/>
+      <path d="M50 86 h20 v14 a10 10 0 0 1 -20 0 Z" fill="#fff" opacity=".85"/>
+      <rect x="52" y="60" width="16" height="20" rx="8" fill="#F3C39A"/>
+      <path d="M22 56 Q18 8 60 8 Q102 8 98 56 L94 84 Q90 70 86 66 Q88 44 60 40 Q32 44 34 66 Q30 70 26 84 Z" fill="#4A3526"/>
+      <circle cx="60" cy="46" r="30" fill="#FCD9B6"/>
+      <circle cx="31" cy="49" r="6" fill="#FCD9B6"/>
+      <circle cx="89" cy="49" r="6" fill="#FCD9B6"/>
+      <path d="M30 41 Q30 14 60 14 Q90 14 90 41 Q80 28 60 28 Q40 28 30 41 Z" fill="#4A3526"/>
+      <path d="M44 41 Q49 39 54 41" stroke="#3A2A1E" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+      <path d="M66 41 Q71 39 76 41" stroke="#3A2A1E" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+      <ellipse cx="50" cy="49" rx="3.3" ry="4" fill="#5A4632"/>
+      <ellipse cx="70" cy="49" rx="3.3" ry="4" fill="#5A4632"/>
+      <circle cx="51.2" cy="47.6" r="1.1" fill="#fff"/>
+      <circle cx="71.2" cy="47.6" r="1.1" fill="#fff"/>
+      <circle cx="41" cy="57" r="5" fill="#FBB0A2" opacity=".8"/>
+      <circle cx="79" cy="57" r="5" fill="#FBB0A2" opacity=".8"/>
+      <path d="M52 58 Q60 65 68 58" stroke="#5A4632" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+    </symbol>
+
+    <!-- 男性（代表） -->
+    <symbol id="ill-man" viewBox="0 0 120 124">
+      <path d="M14 124 Q16 80 60 76 Q104 80 106 124 Z" fill="#6FA8DC"/>
+      <path d="M50 76 L60 96 L70 76 Q65 74 60 74 Q55 74 50 76 Z" fill="#fff"/>
+      <path d="M57 78 L63 78 L61 108 L59 108 Z" fill="#2F4E78"/>
+      <rect x="52" y="60" width="16" height="20" rx="8" fill="#EFBB93"/>
+      <path d="M28 44 Q26 12 60 12 Q94 12 92 44 Q84 30 60 30 Q36 30 28 44 Z" fill="#3A2A1E"/>
+      <circle cx="60" cy="46" r="30" fill="#F7CFA6"/>
+      <circle cx="31" cy="49" r="6" fill="#F7CFA6"/>
+      <circle cx="89" cy="49" r="6" fill="#F7CFA6"/>
+      <path d="M30 42 Q32 18 60 18 Q88 18 90 42 Q80 32 60 32 Q40 32 30 42 Z" fill="#3A2A1E"/>
+      <path d="M44 42 Q49 40 54 42" stroke="#3A2A1E" stroke-width="1.7" fill="none" stroke-linecap="round"/>
+      <path d="M66 42 Q71 40 76 42" stroke="#3A2A1E" stroke-width="1.7" fill="none" stroke-linecap="round"/>
+      <ellipse cx="50" cy="49" rx="3.2" ry="3.8" fill="#5A4632"/>
+      <ellipse cx="70" cy="49" rx="3.2" ry="3.8" fill="#5A4632"/>
+      <circle cx="42" cy="57" r="4.4" fill="#F0A891" opacity=".7"/>
+      <circle cx="78" cy="57" r="4.4" fill="#F0A891" opacity=".7"/>
+      <path d="M53 58 Q60 64 67 58" stroke="#5A4632" stroke-width="2.3" fill="none" stroke-linecap="round"/>
+    </symbol>
+
+    <!-- 女の子 -->
+    <symbol id="ill-girl" viewBox="0 0 100 104">
+      <path d="M18 104 Q20 72 50 68 Q80 72 82 104 Z" fill="#FBC77D"/>
+      <rect x="43" y="54" width="14" height="16" rx="7" fill="#F3C39A"/>
+      <circle cx="22" cy="46" r="11" fill="#4A3526"/>
+      <circle cx="78" cy="46" r="11" fill="#4A3526"/>
+      <circle cx="22" cy="36" r="4.5" fill="#EE7F91"/>
+      <circle cx="78" cy="36" r="4.5" fill="#EE7F91"/>
+      <path d="M23 38 Q22 10 50 10 Q78 10 77 38 Z" fill="#4A3526"/>
+      <circle cx="50" cy="40" r="26" fill="#FCD9B6"/>
+      <path d="M25 37 Q27 14 50 14 Q73 14 75 37 Q64 26 50 26 Q36 26 25 37 Z" fill="#4A3526"/>
+      <circle cx="41" cy="42" r="3.2" fill="#5A4632"/>
+      <circle cx="59" cy="42" r="3.2" fill="#5A4632"/>
+      <circle cx="42" cy="40.8" r="1" fill="#fff"/>
+      <circle cx="60" cy="40.8" r="1" fill="#fff"/>
+      <circle cx="34" cy="49" r="4.2" fill="#FBB0A2" opacity=".85"/>
+      <circle cx="66" cy="49" r="4.2" fill="#FBB0A2" opacity=".85"/>
+      <path d="M44 49 Q50 56 56 49 Z" fill="#E8746A"/>
+    </symbol>
+
+    <!-- 男の子 -->
+    <symbol id="ill-boy" viewBox="0 0 100 104">
+      <path d="M18 104 Q20 72 50 68 Q80 72 82 104 Z" fill="#8ED0A0"/>
+      <rect x="43" y="54" width="14" height="16" rx="7" fill="#F3C39A"/>
+      <circle cx="50" cy="40" r="26" fill="#FCD9B6"/>
+      <circle cx="25" cy="42" r="5" fill="#FCD9B6"/>
+      <circle cx="75" cy="42" r="5" fill="#FCD9B6"/>
+      <path d="M24 40 Q22 12 50 12 Q78 12 76 40 Q68 27 50 27 Q32 27 24 40 Z" fill="#3A2A1E"/>
+      <circle cx="41" cy="42" r="3.2" fill="#5A4632"/>
+      <circle cx="59" cy="42" r="3.2" fill="#5A4632"/>
+      <circle cx="42" cy="40.8" r="1" fill="#fff"/>
+      <circle cx="60" cy="40.8" r="1" fill="#fff"/>
+      <circle cx="34" cy="49" r="4.2" fill="#FBB0A2" opacity=".85"/>
+      <circle cx="66" cy="49" r="4.2" fill="#FBB0A2" opacity=".85"/>
+      <path d="M44 49 Q50 55 56 49" stroke="#5A4632" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+    </symbol>
+
+    <!-- 小物 -->
+    <symbol id="ill-heart" viewBox="0 0 32 30"><path d="M16 28 C2 17 3 5 11 5 C14.5 5 16 9 16 9 C16 9 17.5 5 21 5 C29 5 30 17 16 28 Z" fill="#FF8FA3"/></symbol>
+    <symbol id="ill-star" viewBox="0 0 32 32"><path d="M16 2 L20 12 L31 12.5 L22.5 19.5 L25.5 30 L16 24 L6.5 30 L9.5 19.5 L1 12.5 L12 12 Z" fill="#FCC65B"/></symbol>
+    <symbol id="ill-tablet" viewBox="0 0 90 110">
+      <rect x="6" y="6" width="78" height="98" rx="10" fill="#5A4632"/>
+      <rect x="12" y="14" width="66" height="82" rx="5" fill="#EAF7FF"/>
+      <circle cx="45" cy="100" r="2.6" fill="#EAF7FF"/>
+      <path d="M28 55 l10 12 l24 -28" stroke="#57B72C" stroke-width="8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      <rect x="20" y="24" width="30" height="6" rx="3" fill="#BFE3F2"/>
+      <rect x="20" y="80" width="40" height="6" rx="3" fill="#BFE3F2"/>
+    </symbol>
+    <symbol id="ill-blocks" viewBox="0 0 90 60">
+      <rect x="6" y="30" width="26" height="26" rx="5" fill="#F39801"/>
+      <rect x="34" y="30" width="26" height="26" rx="5" fill="#57B72C"/>
+      <rect x="20" y="4" width="26" height="26" rx="5" fill="#EE7F91"/>
+      <rect x="60" y="18" width="24" height="38" rx="6" fill="#00BAAD"/>
+      <circle cx="72" cy="30" r="5" fill="#fff" opacity=".7"/>
+    </symbol>
+    <symbol id="ill-window" viewBox="0 0 120 120">
+      <rect x="14" y="14" width="92" height="80" rx="12" fill="#DCF3FF"/>
+      <circle cx="82" cy="40" r="12" fill="#FCC65B"/>
+      <path d="M14 78 Q40 60 60 74 Q84 90 106 72 L106 94 L14 94 Z" fill="#BFE7C9"/>
+      <rect x="56" y="16" width="8" height="76" fill="#fff" opacity=".8"/>
+      <rect x="16" y="50" width="88" height="8" fill="#fff" opacity=".8"/>
+      <rect x="8" y="92" width="104" height="10" rx="4" fill="#E8B98A"/>
+    </symbol>
+  </defs>
+</svg>
+
 <!-- ============ ヘッダー ============ -->
 <header>
   <div class="header-inner">
@@ -665,7 +826,16 @@ footer .copy{font-size:11px;opacity:.85;}
       <a class="btn btn-ghost" href="#recruit">募集要項をみる <span class="arrow">▼</span></a>
     </div>
     <div class="hero-illust" aria-hidden="true">
-      <span>🧒</span><span>👧</span><span>🎨</span><span>👦</span><span>🧸</span>
+      <svg class="hero-scene" viewBox="0 0 480 220" xmlns="http://www.w3.org/2000/svg">
+        <ellipse cx="240" cy="204" rx="190" ry="14" fill="#F2C86E" opacity=".45"/>
+        <use class="bob"  href="#ill-heart" x="118" y="26" width="26" height="26"/>
+        <use class="bob2" href="#ill-star"  x="332" y="24" width="26" height="26"/>
+        <use class="bob2" href="#ill-star"  x="60"  y="70" width="18" height="18"/>
+        <use class="bob"  href="#ill-heart" x="392" y="72" width="20" height="20"/>
+        <use href="#ill-girl"    x="70"  y="112" width="96"  height="100"/>
+        <use href="#ill-boy"     x="316" y="112" width="96"  height="100"/>
+        <use class="bob" href="#ill-teacher" x="168" y="46" width="150" height="156"/>
+      </svg>
     </div>
   </div>
   <div class="wave"><svg viewBox="0 0 1440 60" preserveAspectRatio="none"><path d="M0,30 C240,60 480,0 720,30 C960,60 1200,0 1440,30 L1440,60 L0,60 Z" fill="#fff"/></svg></div>
@@ -710,7 +880,16 @@ footer .copy{font-size:11px;opacity:.85;}
       <div class="deco"><span></span><span></span><span></span></div>
     </div>
     <div class="about-card fade">
-      <div class="photo-ph"><span class="ic">🏫</span><span>施設外観・教室風景</span><small>※写真が入ります</small></div>
+      <div class="photo-ph">
+        <svg class="scene" viewBox="0 0 300 225" xmlns="http://www.w3.org/2000/svg">
+          <use href="#ill-window" x="20" y="10" width="128" height="128"/>
+          <ellipse cx="150" cy="210" rx="132" ry="12" fill="#F2C86E" opacity=".4"/>
+          <use href="#ill-blocks" x="182" y="120" width="100" height="66"/>
+          <use href="#ill-girl" x="30" y="128" width="82" height="86"/>
+          <use href="#ill-teacher" x="150" y="60" width="140" height="146"/>
+        </svg>
+        <span class="scene-cap">あたたかい教室の雰囲気</span>
+      </div>
       <div class="about-text">
         <h3>遊びと学びで、発達が気になる子の<br><span>「できた！」</span>を育てる教室です</h3>
         <p>発達こどもアカデミーは、発達に特性のある小学生〜高校生のお子さまが放課後に通う療育教室です。運動・学習・SST（ソーシャルスキルトレーニング）を組み合わせた独自プログラムで、一人ひとりの成長をサポートしています。</p>
@@ -726,15 +905,15 @@ footer .copy{font-size:11px;opacity:.85;}
     <div class="about-mini">
       <div class="voice fade">
         <p>「前職は認可保育園。ここは書類がICT化されていて、残業が本当にないことに驚きました。」</p>
-        <p class="who">保育士・入社2年目</p>
+        <p class="who"><span class="voice-ava"><svg viewBox="0 0 120 124" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg"><use href="#ill-teacher-p" width="120" height="124"/></svg></span>保育士・入社2年目</p>
       </div>
       <div class="voice fade">
         <p>「子ども一人ひとりと深く関われるのが療育の魅力。『できた！』の瞬間に立ち会えるのが幸せです。」</p>
-        <p class="who">児童指導員・入社3年目</p>
+        <p class="who"><span class="voice-ava"><svg viewBox="0 0 120 124" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg"><use href="#ill-man" width="120" height="124"/></svg></span>児童指導員・入社3年目</p>
       </div>
       <div class="voice fade">
         <p>「未経験で入社しましたが、研修が手厚くて安心。今では療育が天職だと思っています。」</p>
-        <p class="who">保育士・入社1年目</p>
+        <p class="who"><span class="voice-ava"><svg viewBox="0 0 120 124" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg"><use href="#ill-teacher" width="120" height="124"/></svg></span>保育士・入社1年目</p>
       </div>
     </div>
   </div>
@@ -760,7 +939,15 @@ footer .copy{font-size:11px;opacity:.85;}
           <li><b>100%</b>有給取得率</li>
         </ul>
       </div>
-      <div class="photo-ph"><span class="ic">💻</span><span>ICTで書類業務もラクラク</span><small>※写真が入ります</small></div>
+      <div class="photo-ph">
+        <svg class="scene" viewBox="0 0 300 225" xmlns="http://www.w3.org/2000/svg">
+          <ellipse cx="150" cy="210" rx="120" ry="12" fill="#F2C86E" opacity=".4"/>
+          <use href="#ill-star" x="214" y="34" width="20" height="20"/>
+          <use href="#ill-tablet" x="188" y="74" width="92" height="112"/>
+          <use href="#ill-teacher" x="24" y="56" width="150" height="156"/>
+        </svg>
+        <span class="scene-cap">ICTで書類業務もラクラク</span>
+      </div>
     </div>
 
     <div class="point-card fade">
@@ -774,7 +961,16 @@ footer .copy{font-size:11px;opacity:.85;}
           <li><b>約2人</b>子ども:スタッフ比</li>
         </ul>
       </div>
-      <div class="photo-ph" style="background:linear-gradient(135deg,#FFD9E2,#FFE9C4);"><span class="ic">🧒</span><span>少人数でじっくり療育</span><small>※写真が入ります</small></div>
+      <div class="photo-ph" style="background:linear-gradient(135deg,#FFD9E2,#FFE9C4);">
+        <svg class="scene" viewBox="0 0 300 225" xmlns="http://www.w3.org/2000/svg">
+          <ellipse cx="150" cy="210" rx="132" ry="12" fill="#EEA9B8" opacity=".4"/>
+          <use href="#ill-heart" x="132" y="26" width="24" height="24"/>
+          <use href="#ill-girl" x="14" y="122" width="86" height="90"/>
+          <use href="#ill-boy" x="202" y="122" width="86" height="90"/>
+          <use href="#ill-teacher-p" x="92" y="58" width="132" height="137"/>
+        </svg>
+        <span class="scene-cap">少人数でじっくり療育</span>
+      </div>
     </div>
 
     <div class="point-card fade">
@@ -788,7 +984,16 @@ footer .copy{font-size:11px;opacity:.85;}
           <li><b>子育て中</b>スタッフ活躍中</li>
         </ul>
       </div>
-      <div class="photo-ph" style="background:linear-gradient(135deg,#DFF5D0,#FFE9C4);"><span class="ic">🤝</span><span>支え合えるチーム</span><small>※写真が入ります</small></div>
+      <div class="photo-ph" style="background:linear-gradient(135deg,#DFF5D0,#FFE9C4);">
+        <svg class="scene" viewBox="0 0 300 225" xmlns="http://www.w3.org/2000/svg">
+          <ellipse cx="150" cy="210" rx="138" ry="12" fill="#9AD3A8" opacity=".45"/>
+          <use href="#ill-star" x="140" y="24" width="22" height="22"/>
+          <use href="#ill-teacher" x="4" y="64" width="140" height="146"/>
+          <use href="#ill-teacher-p" x="156" y="64" width="140" height="146"/>
+          <use href="#ill-boy" x="110" y="126" width="82" height="86"/>
+        </svg>
+        <span class="scene-cap">支え合えるチーム</span>
+      </div>
     </div>
   </div>
 </section>
@@ -837,7 +1042,7 @@ footer .copy{font-size:11px;opacity:.85;}
     </div>
 
     <div class="msg-card fade">
-      <div class="msg-photo"><span>👩‍💼</span><small>※写真が入ります</small></div>
+      <div class="msg-photo"><svg class="bust" viewBox="0 0 120 124" xmlns="http://www.w3.org/2000/svg"><use href="#ill-teacher-p" width="120" height="124"/></svg></div>
       <div class="msg-body">
         <span class="role">保育マネージャー</span>
         <h3>豊田 さくら<small>保育士歴12年</small></h3>
@@ -847,7 +1052,7 @@ footer .copy{font-size:11px;opacity:.85;}
     </div>
 
     <div class="msg-card fade">
-      <div class="msg-photo" style="background:linear-gradient(135deg,#D9F0FF,#FFE9C4);"><span>👨‍💼</span><small>※写真が入ります</small></div>
+      <div class="msg-photo" style="background:linear-gradient(135deg,#D9F0FF,#FFE9C4);"><svg class="bust" viewBox="0 0 120 124" xmlns="http://www.w3.org/2000/svg"><use href="#ill-man" width="120" height="124"/></svg></div>
       <div class="msg-body">
         <span class="role">代表取締役</span>
         <h3>川崎 大和</h3>
