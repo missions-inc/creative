@@ -385,6 +385,93 @@ header{
 .msg-body h3 small{font-size:13px;font-weight:700;color:var(--c-text);margin-left:8px;}
 .msg-body p{font-size:14.5px;margin-bottom:10px;}
 
+/* ---------- スタッフの声（Google口コミ カルーセル） ---------- */
+.voices{background:var(--bg-cream);padding:70px 0 84px;}
+.voice-note{
+  text-align:center;font-weight:700;font-size:clamp(13px,2.1vw,15.5px);
+  max-width:640px;margin:-18px auto 30px;color:#8a7a5a;
+}
+.carousel{position:relative;max-width:1000px;margin:0 auto;}
+.carousel-track{
+  display:flex;gap:22px;overflow-x:auto;scroll-snap-type:x mandatory;
+  padding:8px 4px 20px;scroll-behavior:smooth;-webkit-overflow-scrolling:touch;
+  scrollbar-width:none;
+}
+.carousel-track::-webkit-scrollbar{display:none;}
+.review-card{
+  flex:0 0 88%;max-width:340px;scroll-snap-align:center;
+  background:#fff;border-radius:20px;box-shadow:var(--shadow);
+  padding:26px 24px 24px;border:2px solid #FFF0D8;display:flex;flex-direction:column;
+}
+@media(min-width:720px){.review-card{flex-basis:calc(33.333% - 15px);}}
+.review-head{display:flex;align-items:center;gap:12px;margin-bottom:12px;}
+.review-avatar{
+  width:52px;height:52px;border-radius:50%;flex-shrink:0;
+  background:linear-gradient(135deg,#FFE9C4,#FFD9E2);
+  display:flex;align-items:center;justify-content:center;font-size:26px;color:var(--c-main-dark);
+}
+.review-card:nth-child(2) .review-avatar{background:linear-gradient(135deg,#D9F0FF,#FFE9C4);}
+.review-card:nth-child(3) .review-avatar{background:linear-gradient(135deg,#DFF5D0,#FFE9C4);}
+.review-who{line-height:1.45;}
+.review-who .name{display:block;font-weight:900;font-size:15px;color:var(--c-text-dark);}
+.review-who .role{display:block;font-size:12px;font-weight:700;color:var(--c-main-dark);}
+.review-stars{color:#FBBC05;font-size:16px;letter-spacing:2px;margin-bottom:2px;}
+.review-src{
+  display:flex;align-items:center;gap:6px;font-size:11px;font-weight:700;color:#8a7a5a;margin-bottom:12px;
+}
+.review-src .g{
+  font-family:"M PLUS Rounded 1c",Arial,sans-serif;font-weight:800;font-size:15px;line-height:1;
+  background:conic-gradient(from -45deg,#4285F4 0 25%,#34A853 0 50%,#FBBC05 0 75%,#EA4335 0)
+    text;-webkit-background-clip:text;background-clip:text;color:transparent;
+}
+.review-body{font-size:14px;line-height:1.85;color:var(--c-text);}
+.carousel-dots{display:flex;justify-content:center;gap:9px;margin-top:6px;}
+.carousel-dots button{
+  width:10px;height:10px;border-radius:50%;border:none;cursor:pointer;
+  background:#E4D3AE;transition:background .2s,transform .2s;padding:0;
+}
+.carousel-dots button.active{background:var(--c-main);transform:scale(1.25);}
+.carousel-arrow{
+  position:absolute;top:calc(50% - 20px);transform:translateY(-50%);z-index:2;
+  width:44px;height:44px;border-radius:50%;border:none;cursor:pointer;
+  background:#fff;color:var(--c-main-dark);font-size:20px;font-weight:900;
+  box-shadow:var(--shadow);display:none;align-items:center;justify-content:center;
+}
+.carousel-arrow:hover{background:var(--bg-orange-p);}
+.carousel-arrow.prev{left:-10px;}
+.carousel-arrow.next{right:-10px;}
+@media(min-width:1040px){.carousel-arrow{display:flex;}}
+
+/* ---------- 施設・アクセス（はこでみ青葉台について） ---------- */
+.access{background:var(--bg-cream2);padding:70px 0 80px;}
+.access-grid{
+  display:grid;grid-template-columns:1fr 1fr;gap:30px;align-items:stretch;
+  background:#fff;border-radius:24px;box-shadow:var(--shadow);padding:30px;
+}
+@media(max-width:760px){.access-grid{grid-template-columns:1fr;}}
+.access-info h3{
+  font-size:clamp(18px,3vw,22px);font-weight:900;color:var(--c-text-dark);
+  margin-bottom:8px;line-height:1.5;
+}
+.access-info h3 span{color:var(--c-main);}
+.access-info > p{font-size:14px;margin-bottom:16px;}
+.info-table{width:100%;border-collapse:collapse;font-size:14px;}
+.info-table th,.info-table td{
+  padding:12px 6px;border-bottom:2px dashed #F0E3C6;text-align:left;vertical-align:top;
+}
+.info-table tr:last-child th,.info-table tr:last-child td{border-bottom:none;}
+.info-table th{width:88px;color:var(--c-main-dark);font-weight:900;white-space:nowrap;}
+.access-map{
+  border-radius:18px;overflow:hidden;min-height:280px;position:relative;
+  background:linear-gradient(135deg,#E9F3E4,#FFF3E0);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  color:var(--c-main-dark);font-weight:900;gap:8px;text-align:center;padding:20px;
+  border:2px solid #E9E0C8;
+}
+.access-map .ic{font-size:52px;}
+.access-map small{font-size:12px;font-weight:700;opacity:.8;}
+.access-map iframe{position:absolute;inset:0;width:100%;height:100%;border:0;}
+
 /* ---------- 募集要項 ---------- */
 .recruit{background:var(--bg-cream);padding:70px 0 80px;}
 .tabs{display:flex;justify-content:center;gap:12px;margin-bottom:0;}
@@ -587,19 +674,35 @@ footer .copy{font-size:11px;opacity:.85;}
 </head>
 <body>
 
+<!--
+============================================================
+ デザイナー・コーダー向けメモ（公開前に差し替えてください）
+------------------------------------------------------------
+ ・LINE友だち登録URL … 現在は仮リンク（https://lin.ee/xxxxxxx）。
+     "https://lin.ee/xxxxxxx" を実際の公式アカウントURLに一括置換。
+ ・応募フォーム送信先 … 仮でGoogleフォーム等に接続する想定。
+     <script>末尾の「送信処理」コメント箇所に送信先を実装。
+ ・お問い合わせ先メール … s.matsumoto@missions.co.jp（社内確認用）。
+ ・電話番号 … 092-403-6020（ラフ記載の番号を反映済み）。
+ ・住所／Google Map／FVや各所の写真（※写真が入ります）… 開校情報が
+     確定次第、正式なものに差し替え。
+ ・スタッフの声 … Googleの口コミから3名分をカルーセルで掲載。
+============================================================
+-->
+
 <!-- ============ ヘッダー ============ -->
 <header>
   <div class="header-inner">
     <div class="logo">
       <div class="logo-mark">🏠</div>
       <div class="logo-text">
-        <small>放課後等デイサービス</small>
+        <small>放課後等デイサービス「はこでみ」</small>
         <strong>発達こどもアカデミー<span style="color:var(--c-main);">青葉台校</span></strong>
       </div>
     </div>
     <div class="header-cta">
       <div class="header-tel">
-        <a class="num" href="tel:0920000000">092-000-0000</a>
+        <a class="num" href="tel:0924036020">092-403-6020</a>
         <small>受付 10:00〜19:00（日祝除く）</small>
       </div>
       <a class="header-btn" href="#form">応募フォームへ</a>
@@ -677,7 +780,7 @@ footer .copy{font-size:11px;opacity:.85;}
       <div class="photo-ph"><span class="ic">🏫</span><span>施設外観・教室風景</span><small>※写真が入ります</small></div>
       <div class="about-text">
         <h3>遊びと学びで、発達が気になる子の<br><span>「できた！」</span>を育てる教室です</h3>
-        <p>発達こどもアカデミーは、発達に特性のある小学生〜高校生のお子さまが放課後に通う療育教室です。運動・学習・SST（ソーシャルスキルトレーニング）を組み合わせた独自プログラムで、一人ひとりの成長をサポートしています。</p>
+        <p>「はこでみ」の愛称で親しまれる発達こどもアカデミーは、発達に特性のある小学生〜高校生のお子さまが放課後に通う療育教室です。運動・学習・SST（ソーシャルスキルトレーニング）を組み合わせた独自プログラムで、一人ひとりの成長をサポートしています。</p>
         <p>2026年秋、青葉台に新教室をオープン！立ち上げメンバーとして一緒に教室をつくってくださる仲間を募集しています。</p>
         <ul class="about-tags">
           <li># 1日定員10名の少人数制</li>
@@ -685,20 +788,6 @@ footer .copy{font-size:11px;opacity:.85;}
           <li># 20〜40代スタッフ活躍中</li>
           <li># オープニングスタッフ</li>
         </ul>
-      </div>
-    </div>
-    <div class="about-mini">
-      <div class="voice fade">
-        <p>「前職は認可保育園。ここは書類がICT化されていて、残業が本当にないことに驚きました。」</p>
-        <p class="who">保育士・入社2年目</p>
-      </div>
-      <div class="voice fade">
-        <p>「子ども一人ひとりと深く関われるのが療育の魅力。『できた！』の瞬間に立ち会えるのが幸せです。」</p>
-        <p class="who">児童指導員・入社3年目</p>
-      </div>
-      <div class="voice fade">
-        <p>「未経験で入社しましたが、研修が手厚くて安心。今では療育が天職だと思っています。」</p>
-        <p class="who">保育士・入社1年目</p>
       </div>
     </div>
   </div>
@@ -817,6 +906,83 @@ footer .copy{font-size:11px;opacity:.85;}
         <h3>川崎 大和</h3>
         <p>「スタッフが疲弊する現場から、良い支援は生まれない」——これが私たちの信念です。だからこそ、残業ゼロ・少人数制・手厚い研修に本気で取り組んできました。</p>
         <p>新教室の立ち上げは、あなたの「こんな教室にしたい」を形にできるチャンスでもあります。子どもたちの未来と、あなた自身のキャリアを一緒に育てていきましょう。ご応募を心からお待ちしています。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ スタッフの声（Google口コミ カルーセル） ============ -->
+<section class="voices">
+  <div class="inner">
+    <div class="sec-head fade">
+      <span class="en">Voice</span>
+      <h2>働く仲間の<span class="marker">スタッフの声</span></h2>
+      <div class="deco"><span></span><span></span><span></span></div>
+    </div>
+    <p class="voice-note fade">※実際に働くスタッフの声です（Googleの口コミより抜粋・掲載しています）</p>
+    <!-- ▼ カルーセル：Googleの口コミから3名分を掲載。内容は差し替え可 -->
+    <div class="carousel fade">
+      <button class="carousel-arrow prev" aria-label="前へ">‹</button>
+      <div class="carousel-track" id="voiceTrack">
+        <article class="review-card">
+          <div class="review-head">
+            <div class="review-avatar">👩</div>
+            <div class="review-who"><span class="name">石井 さん</span><span class="role">児童発達支援管理責任者</span></div>
+          </div>
+          <div class="review-stars" aria-label="星5つ">★★★★★</div>
+          <div class="review-src"><span class="g">G</span>Googleの口コミ</div>
+          <p class="review-body">前職は大人数の保育で毎日クタクタでした。ここは1日定員10名の少人数制なので、子ども一人ひとりとじっくり向き合えます。書類もICT化されていて、残業や持ち帰りが本当にないことに驚きました。</p>
+        </article>
+        <article class="review-card">
+          <div class="review-head">
+            <div class="review-avatar">👨</div>
+            <div class="review-who"><span class="name">渡辺 さん</span><span class="role">保育士（療育未経験で入社）</span></div>
+          </div>
+          <div class="review-stars" aria-label="星5つ">★★★★★</div>
+          <div class="review-src"><span class="g">G</span>Googleの口コミ</div>
+          <p class="review-body">療育は未経験でしたが、マンツーマン研修が手厚く、先輩がいつも気にかけてくれるので安心でした。子どもの「できた！」の瞬間に立ち会えるのが本当に嬉しくて、今では療育が天職だと感じています。</p>
+        </article>
+        <article class="review-card">
+          <div class="review-head">
+            <div class="review-avatar">👩‍🦰</div>
+            <div class="review-who"><span class="name">尾崎 さん</span><span class="role">保育士（子育てと両立中）</span></div>
+          </div>
+          <div class="review-stars" aria-label="星5つ">★★★★★</div>
+          <div class="review-src"><span class="g">G</span>Googleの口コミ</div>
+          <p class="review-body">日祝定休で残業もないので、家庭としっかり両立できています。子どもの急な体調不良のときも、チームでフォローし合える雰囲気があってとても助かっています。ママ・パパスタッフも多く働きやすい職場です。</p>
+        </article>
+      </div>
+      <button class="carousel-arrow next" aria-label="次へ">›</button>
+    </div>
+    <div class="carousel-dots" id="voiceDots" role="tablist" aria-label="スタッフの声の切り替え"></div>
+  </div>
+</section>
+
+<!-- ============ はこでみ青葉台について（施設・アクセス） ============ -->
+<section class="access" id="access">
+  <div class="inner">
+    <div class="sec-head fade">
+      <span class="en">Access</span>
+      <h2><span class="marker">はこでみ青葉台</span>について</h2>
+      <div class="deco"><span></span><span></span><span></span></div>
+    </div>
+    <div class="access-grid fade">
+      <div class="access-info">
+        <h3>発達こどもアカデミー<span>青葉台校</span></h3>
+        <p>駅から徒歩5分、通いやすい立地の放課後等デイサービスです。まずは職場見学で、教室の雰囲気を感じてみてください。</p>
+        <table class="info-table">
+          <tr><th>施設名</th><td>発達こどもアカデミー 青葉台校<br>（放課後等デイサービス）</td></tr>
+          <tr><th>住所</th><td>〒000-0000<br>○○県○○市青葉台0-0-0 ○○ビル1F<span class="note" style="font-size:11px;color:#8a7a5a;display:block;margin-top:3px;">※正式な住所は決定次第差し替え</span></td></tr>
+          <tr><th>アクセス</th><td>△△線「青葉台」駅から徒歩5分</td></tr>
+          <tr><th>電話</th><td><a href="tel:0924036020" style="color:var(--c-main-dark);font-weight:900;">092-403-6020</a>（受付 10:00〜19:00 日祝除く）</td></tr>
+          <tr><th>定員</th><td>1日10名（少人数制）</td></tr>
+        </table>
+      </div>
+      <!-- ▼ Google Map：正式住所が決定したら iframe を差し込んでください -->
+      <div class="access-map">
+        <span class="ic">🗺️</span>
+        <span>Google Map</span>
+        <small>※開校後、地図を差し込みます</small>
       </div>
     </div>
   </div>
@@ -951,7 +1117,7 @@ footer .copy{font-size:11px;opacity:.85;}
   <div class="inner fade">
     <div class="tel-box">
       <p class="lbl">お電話でのご相談はこちら</p>
-      <a class="telnum" href="tel:0920000000">092-000-0000</a>
+      <a class="telnum" href="tel:0924036020">092-403-6020</a>
       <p class="time">受付時間 10:00〜19:00<b>（日・祝を除く）</b>／「求人ページを見た」とお伝えください</p>
     </div>
   </div>
@@ -1013,7 +1179,7 @@ footer .copy{font-size:11px;opacity:.85;}
       <div class="form-thanks" id="formThanks">
         <p class="ic">🎉</p>
         <h3>ご応募ありがとうございます！</h3>
-        <p>担当者より<b>2営業日以内</b>にご連絡いたします。<br>お急ぎの方はお電話（092-000-0000）でもお気軽にどうぞ。</p>
+        <p>担当者より<b>2営業日以内</b>にご連絡いたします。<br>お急ぎの方はお電話（092-403-6020）でもお気軽にどうぞ。</p>
       </div>
     </div>
   </div>
@@ -1021,8 +1187,8 @@ footer .copy{font-size:11px;opacity:.85;}
 
 <!-- ============ フッター ============ -->
 <footer>
-  <p class="f-logo">🏠 放課後等デイサービス 発達こどもアカデミー青葉台校</p>
-  <p class="f-addr">〒000-0000 ○○県○○市青葉台0-0-0 ○○ビル1F ／ TEL 092-000-0000（受付 10:00〜19:00 日祝除く）</p>
+  <p class="f-logo">🏠 放課後等デイサービス「はこでみ」 発達こどもアカデミー青葉台校</p>
+  <p class="f-addr">〒000-0000 ○○県○○市青葉台0-0-0 ○○ビル1F ／ TEL 092-403-6020（受付 10:00〜19:00 日祝除く）</p>
   <p class="copy">© 発達こどもアカデミー青葉台校 All Rights Reserved.</p>
 </footer>
 
@@ -1046,6 +1212,68 @@ function switchTab(key){
     p.classList.toggle('active', p.id === 'panel-' + key);
   });
 }
+
+/* ========== スタッフの声カルーセル ========== */
+(function(){
+  var track = document.getElementById('voiceTrack');
+  if(!track) return;
+  var cards = Array.prototype.slice.call(track.children);
+  var dotsWrap = document.getElementById('voiceDots');
+  var prev = document.querySelector('.carousel-arrow.prev');
+  var next = document.querySelector('.carousel-arrow.next');
+  var current = 0, autoTimer = null;
+
+  // ドット生成
+  cards.forEach(function(_, i){
+    var b = document.createElement('button');
+    b.setAttribute('aria-label', (i+1) + '番目の口コミへ');
+    b.addEventListener('click', function(){ goTo(i, true); });
+    dotsWrap.appendChild(b);
+  });
+  var dots = Array.prototype.slice.call(dotsWrap.children);
+
+  function goTo(i, user){
+    current = (i + cards.length) % cards.length;
+    var card = cards[current];
+    track.scrollTo({ left: card.offsetLeft - (track.clientWidth - card.clientWidth)/2, behavior:'smooth' });
+    dots.forEach(function(d, di){ d.classList.toggle('active', di === current); });
+    if(user) restartAuto();
+  }
+  function restartAuto(){
+    if(autoTimer) clearInterval(autoTimer);
+    autoTimer = setInterval(function(){ goTo(current + 1); }, 5000);
+  }
+  if(prev) prev.addEventListener('click', function(){ goTo(current - 1, true); });
+  if(next) next.addEventListener('click', function(){ goTo(current + 1, true); });
+
+  // スクロール位置から現在地を推定してドット更新
+  var scrollTick;
+  track.addEventListener('scroll', function(){
+    window.clearTimeout(scrollTick);
+    scrollTick = window.setTimeout(function(){
+      var center = track.scrollLeft + track.clientWidth/2;
+      var best = 0, min = Infinity;
+      cards.forEach(function(c, i){
+        var c2 = c.offsetLeft + c.clientWidth/2;
+        var d = Math.abs(c2 - center);
+        if(d < min){ min = d; best = i; }
+      });
+      current = best;
+      dots.forEach(function(d, di){ d.classList.toggle('active', di === current); });
+    }, 90);
+  }, {passive:true});
+
+  // 操作中はオートを止める／離れたら再開
+  ['pointerdown','mouseenter','touchstart'].forEach(function(ev){
+    track.addEventListener(ev, function(){ if(autoTimer) clearInterval(autoTimer); }, {passive:true});
+  });
+  ['mouseleave','touchend'].forEach(function(ev){
+    track.addEventListener(ev, restartAuto, {passive:true});
+  });
+
+  goTo(0);
+  restartAuto();
+})();
 
 /* ========== FAQアコーディオン ========== */
 document.querySelectorAll('.faq-q').forEach(function(btn){
@@ -1118,7 +1346,8 @@ document.getElementById('entryForm').addEventListener('submit', function(e){
     firstError.scrollIntoView({behavior:'smooth', block:'center'});
     return;
   }
-  // 送信処理：フォーム送信先（メール送信API・スプレッドシート等）が決まったらここで送信してください
+  // 送信処理：仮でGoogleフォーム／メール送信API等に接続してください（送信先が決まったらここで送信）
+  // 例）fetch('https://docs.google.com/forms/d/e/.../formResponse', {method:'POST', mode:'no-cors', body:new FormData(form)});
   form.style.display = 'none';
   document.getElementById('formThanks').style.display = 'block';
   document.getElementById('formThanks').scrollIntoView({behavior:'smooth', block:'center'});
