@@ -1,0 +1,939 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>【2024年秋オープン予定】看護・介護オープニングスタッフ募集中！｜ケアライフ</title>
+<meta name="description" content="ケアライフの看護・介護オープニングスタッフ募集。全国展開の安定企業で、時短・Wワーク・シフト自由など選べる働き方。独自のキャリアアップ制度と手厚い研修で未経験も安心。まずはLINEでお気軽に！">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;500;700;800&family=Zen+Maru+Gothic:wght@500;700;900&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   ケアライフ 看護・介護 採用LP
+   Design: ローズピンク × ホワイト／丸ゴシック（ポップ＆ソフト）
+============================================================ */
+:root{
+  --c-main:      #E25A8C;   /* ローズピンク */
+  --c-main-dark: #BE3D6E;
+  --c-main-light:#F183AE;
+  --c-accent:    #6BB6D6;   /* ソフトブルー */
+  --c-green:     #7CB342;   /* ロゴグリーン */
+  --c-yellow:    #FBC02D;
+  --c-line:      #06C755;   /* LINEグリーン */
+  --c-red:       #F0587B;
+  --c-text:      #574750;
+  --c-text-dark: #3a2b33;
+  --bg-white:    #FFFFFF;
+  --bg-pink:     #FEF3F8;
+  --bg-pink2:    #FCE7F0;
+  --bg-pink-p:   #FBDCE9;
+  --shadow:      0 6px 20px rgba(200,80,130,.15);
+  --radius:      16px;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;scroll-padding-top:80px;}
+body{
+  font-family:"Zen Maru Gothic","M PLUS Rounded 1c","Hiragino Maru Gothic ProN",sans-serif;
+  font-weight:500;color:var(--c-text);background:var(--bg-white);
+  line-height:1.85;overflow-x:hidden;
+}
+img{max-width:100%;height:auto;display:block;}
+a{color:inherit;text-decoration:none;}
+ul,ol{list-style:none;}
+.inner{max-width:960px;margin:0 auto;padding:0 20px;}
+section{position:relative;}
+
+/* ---------- 共通見出し ---------- */
+.sec-head{text-align:center;margin-bottom:40px;}
+.sec-head .en{
+  display:block;font-family:"M PLUS Rounded 1c",sans-serif;font-weight:800;
+  font-size:13px;letter-spacing:.22em;color:var(--c-main-light);text-transform:uppercase;
+  margin-bottom:6px;
+}
+.sec-head h2{
+  font-size:clamp(23px,4.6vw,34px);font-weight:900;color:var(--c-main-dark);line-height:1.5;
+}
+.sec-head h2 .marker{background:linear-gradient(transparent 62%,#FBD6E5 62%);padding:0 .1em;}
+.sec-head .deco{display:flex;justify-content:center;gap:9px;margin-top:14px;}
+.sec-head .deco span{width:9px;height:9px;border-radius:50%;background:var(--c-main);}
+.sec-head .deco span:nth-child(2){background:var(--c-main-light);}
+.sec-head .deco span:nth-child(3){background:var(--c-green);}
+.sec-head.on-pink h2{color:#fff;text-shadow:0 2px 0 rgba(150,40,80,.2);}
+.sec-head.on-pink .en{color:#FCD9E6;}
+.sec-head.on-pink h2 .marker{background:linear-gradient(transparent 60%,rgba(255,255,255,.4) 60%);}
+
+/* ---------- ボタン ---------- */
+.btn{
+  position:relative;display:inline-flex;align-items:center;justify-content:center;gap:10px;
+  font-weight:900;text-align:center;border-radius:50px;cursor:pointer;
+  transition:transform .2s,box-shadow .2s,background .2s;border:none;line-height:1.4;
+}
+.btn:hover{transform:translateY(-3px);}
+.btn-line{
+  background:var(--c-line);color:#fff;font-size:clamp(16px,2.6vw,20px);
+  padding:18px 40px 18px 58px;box-shadow:0 6px 0 #04a244;
+}
+.btn-line:hover{box-shadow:0 9px 0 #04a244;}
+.btn-line::before{
+  content:"";position:absolute;left:22px;top:50%;transform:translateY(-50%);
+  width:28px;height:28px;background-repeat:no-repeat;background-size:contain;
+  background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white"><path d="M12 2C6.48 2 2 5.64 2 10.1c0 3.99 3.54 7.33 8.32 7.97.32.07.77.21.88.49.1.25.07.64.03.9l-.14.85c-.04.25-.2.99.87.54 1.07-.45 5.77-3.4 7.87-5.82C21.28 13.35 22 11.82 22 10.1 22 5.64 17.52 2 12 2z"/></svg>');
+}
+.btn-line small{display:block;font-size:.66em;font-weight:700;width:100%;}
+.btn-pink{
+  background:var(--c-main);color:#fff;font-size:clamp(15px,2.2vw,18px);
+  padding:16px 40px;box-shadow:0 5px 0 var(--c-main-dark);
+}
+.btn-pink:hover{background:var(--c-main-light);box-shadow:0 8px 0 var(--c-main-dark);}
+.btn-ghost{
+  background:#fff;color:var(--c-main);border:3px solid var(--c-main);
+  font-size:clamp(14px,2vw,16px);padding:13px 34px;
+}
+.btn-ghost:hover{background:var(--bg-pink);}
+.btn .arrow{font-family:sans-serif;font-weight:700;}
+
+/* ---------- 波区切り ---------- */
+.wave{display:block;width:100%;height:56px;line-height:0;}
+.wave svg{display:block;width:100%;height:100%;}
+
+/* ---------- ヘッダー ---------- */
+header{
+  position:sticky;top:0;z-index:100;background:rgba(255,255,255,.96);backdrop-filter:blur(6px);
+  box-shadow:0 2px 10px rgba(200,80,130,.12);
+}
+.header-inner{
+  max-width:1100px;margin:0 auto;padding:9px 20px;
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+}
+.logo{display:flex;align-items:center;gap:10px;}
+.logo-mark{
+  width:44px;height:44px;border-radius:14px;flex-shrink:0;
+  background:linear-gradient(135deg,var(--c-green),#9CCC65);color:#fff;
+  display:flex;align-items:center;justify-content:center;font-size:24px;
+  box-shadow:0 3px 8px rgba(124,179,66,.3);
+}
+.logo-text{line-height:1.3;}
+.logo-text small{display:block;font-size:10px;color:var(--c-main-dark);font-weight:700;}
+.logo-text strong{font-size:19px;font-weight:900;color:var(--c-green);letter-spacing:.02em;}
+.header-cta{display:flex;align-items:center;gap:10px;}
+.header-tel{text-align:right;line-height:1.25;}
+.header-tel .num{font-family:"M PLUS Rounded 1c",sans-serif;font-weight:800;font-size:20px;color:var(--c-main-dark);}
+.header-tel .num::before{content:"📞 ";font-size:15px;}
+.header-tel small{font-size:10px;color:var(--c-text);}
+.header-btn{
+  background:var(--c-main);color:#fff;font-weight:900;font-size:13px;
+  padding:10px 18px;border-radius:50px;box-shadow:0 3px 0 var(--c-main-dark);
+  transition:transform .2s;white-space:nowrap;
+}
+.header-btn:hover{transform:translateY(-2px);}
+@media(max-width:640px){
+  .header-tel{display:none;}
+  .logo-text strong{font-size:16px;}
+}
+
+/* ---------- ヒーロー ---------- */
+.hero{
+  background:
+    radial-gradient(circle at 10% 12%, rgba(226,90,140,.10) 0 60px, transparent 61px),
+    radial-gradient(circle at 90% 16%, rgba(107,182,214,.14) 0 70px, transparent 71px),
+    radial-gradient(circle at 14% 84%, rgba(124,179,66,.12) 0 50px, transparent 51px),
+    radial-gradient(circle at 88% 82%, rgba(241,131,174,.16) 0 55px, transparent 56px),
+    linear-gradient(180deg,#EAF6FB 0%,var(--bg-pink) 60%,var(--bg-pink2) 100%);
+  padding:38px 0 0;text-align:center;overflow:hidden;
+}
+.hero-badge-top{
+  display:inline-block;background:var(--c-yellow);color:#7a5200;font-weight:900;
+  font-size:clamp(13px,2.6vw,17px);padding:8px 26px;border-radius:50px;
+  box-shadow:var(--shadow);margin-bottom:16px;position:relative;
+}
+.hero-badge-top::after{
+  content:"";position:absolute;bottom:-8px;left:50%;transform:translateX(-50%);
+  border:9px solid transparent;border-top-color:var(--c-yellow);border-bottom:0;
+}
+.hero .service-tag{
+  font-size:clamp(14px,2.4vw,18px);font-weight:900;color:var(--c-accent);
+  letter-spacing:.14em;margin-bottom:2px;
+}
+.hero h1{
+  font-size:clamp(28px,6.6vw,52px);font-weight:900;color:var(--c-text-dark);
+  line-height:1.35;margin-bottom:22px;
+}
+.hero h1 .pink{color:var(--c-main);}
+.hero h1 .big{font-size:1.12em;}
+.hero-photo{
+  max-width:560px;margin:0 auto 24px;border-radius:22px;overflow:hidden;
+  box-shadow:var(--shadow);background:linear-gradient(135deg,#CFE9F5,#FBDCE9);
+  aspect-ratio:16/9;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  color:var(--c-main-dark);font-weight:900;gap:6px;
+}
+.hero-photo .ic{font-size:54px;}
+.hero-photo small{font-size:12px;opacity:.75;}
+.hero-points{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;margin-bottom:26px;}
+.hero-points li{
+  width:118px;height:118px;border-radius:50%;background:#fff;border:4px solid var(--c-main);
+  color:var(--c-main-dark);display:flex;flex-direction:column;align-items:center;justify-content:center;
+  font-weight:900;font-size:13px;line-height:1.4;box-shadow:var(--shadow);padding:6px;
+}
+.hero-points li strong{color:var(--c-red);font-size:1.22em;}
+.hero-points li:nth-child(2){border-color:var(--c-accent);}
+.hero-points li:nth-child(3){border-color:var(--c-green);}
+.hero-cta{display:flex;flex-direction:column;align-items:center;gap:13px;padding-bottom:8px;}
+.hero-cta .lead{font-weight:900;color:var(--c-text-dark);font-size:clamp(14px,2.4vw,17px);}
+.hero-cta .lead .pop{color:var(--c-red);}
+.hero-illust{
+  display:flex;justify-content:center;gap:6px;font-size:42px;margin-top:20px;
+  filter:drop-shadow(0 4px 4px rgba(200,80,130,.2));
+}
+.hero-illust span{animation:bounce 2.4s ease-in-out infinite;}
+.hero-illust span:nth-child(2){animation-delay:.2s;}
+.hero-illust span:nth-child(3){animation-delay:.4s;}
+.hero-illust span:nth-child(4){animation-delay:.6s;}
+.hero-illust span:nth-child(5){animation-delay:.8s;}
+@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+@media(max-width:480px){
+  .hero-points li{width:100px;height:100px;font-size:11.5px;border-width:3px;}
+}
+
+/* ---------- 特徴（全国展開） ---------- */
+.feature{background:#fff;padding:66px 0 76px;}
+.feature-lead{
+  text-align:center;font-weight:900;color:var(--c-main-dark);
+  font-size:clamp(17px,3vw,24px);margin-bottom:8px;
+}
+.feature-lead b{color:var(--c-main);font-size:1.25em;}
+.feature-sub{text-align:center;font-size:14.5px;max-width:640px;margin:0 auto 34px;}
+.feature-map{
+  display:grid;grid-template-columns:auto 1fr;gap:28px;align-items:center;
+  max-width:760px;margin:0 auto;background:var(--bg-pink);border-radius:24px;
+  padding:32px 30px;box-shadow:var(--shadow);
+}
+@media(max-width:640px){.feature-map{grid-template-columns:1fr;text-align:center;}}
+.feature-map .map-ic{
+  font-size:96px;line-height:1;filter:drop-shadow(0 6px 8px rgba(200,80,130,.2));justify-self:center;
+}
+.feature-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+.feature-stats li{
+  background:#fff;border-radius:14px;padding:16px 8px;text-align:center;box-shadow:0 3px 10px rgba(200,80,130,.1);
+}
+.feature-stats li b{display:block;font-family:"M PLUS Rounded 1c",sans-serif;font-size:26px;color:var(--c-main);line-height:1.1;}
+.feature-stats li span{font-size:11.5px;font-weight:700;color:var(--c-text);}
+
+/* ---------- 選べる働き方 ---------- */
+.workstyle{background:var(--bg-pink);padding:66px 0 76px;}
+.workstyle .wave-top{position:absolute;top:-1px;left:0;transform:rotate(180deg);}
+.ws-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;}
+@media(max-width:720px){.ws-grid{grid-template-columns:1fr 1fr;}}
+.ws-card{
+  background:#fff;border-radius:20px;padding:26px 16px 22px;text-align:center;
+  box-shadow:var(--shadow);border:2px solid #FBDCE9;
+}
+.ws-card .ic{
+  width:70px;height:70px;margin:0 auto 12px;border-radius:50%;
+  background:linear-gradient(135deg,var(--c-main),var(--c-main-light));
+  display:flex;align-items:center;justify-content:center;font-size:34px;
+  box-shadow:0 4px 0 var(--c-main-dark);
+}
+.ws-card:nth-child(2) .ic{background:linear-gradient(135deg,var(--c-accent),#9AD3E8);box-shadow:0 4px 0 #4a95b5;}
+.ws-card:nth-child(3) .ic{background:linear-gradient(135deg,var(--c-green),#AED581);box-shadow:0 4px 0 #5a8f2f;}
+.ws-card:nth-child(4) .ic{background:linear-gradient(135deg,var(--c-yellow),#FFD54F);box-shadow:0 4px 0 #c99700;}
+.ws-card h3{font-size:16px;font-weight:900;color:var(--c-main-dark);margin-bottom:6px;}
+.ws-card p{font-size:12.5px;line-height:1.7;}
+
+/* ---------- キャリアアップ ---------- */
+.career{background:#fff;padding:66px 0 76px;}
+.career-card{
+  display:grid;grid-template-columns:1fr 1fr;gap:32px;align-items:center;
+  background:var(--bg-pink);border-radius:24px;padding:34px 30px;box-shadow:var(--shadow);
+}
+@media(max-width:720px){.career-card{grid-template-columns:1fr;}}
+.career-text h3{font-size:clamp(18px,3vw,23px);font-weight:900;color:var(--c-main-dark);line-height:1.5;margin-bottom:12px;}
+.career-text h3 .marker{background:linear-gradient(transparent 62%,#FBD6E5 62%);}
+.career-text p{font-size:14.5px;margin-bottom:14px;}
+.career-text .ca-list{display:grid;gap:9px;}
+.career-text .ca-list li{
+  background:#fff;border-radius:10px;padding:10px 14px 10px 40px;position:relative;
+  font-size:13.5px;font-weight:700;box-shadow:0 2px 8px rgba(200,80,130,.08);
+}
+.career-text .ca-list li::before{
+  content:"✓";position:absolute;left:12px;top:50%;transform:translateY(-50%);
+  width:22px;height:22px;border-radius:50%;background:var(--c-main);color:#fff;
+  display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;
+}
+.chart{
+  background:#fff;border-radius:18px;padding:24px 20px 16px;box-shadow:0 3px 12px rgba(200,80,130,.1);
+}
+.chart-title{text-align:center;font-size:13px;font-weight:900;color:var(--c-main-dark);margin-bottom:16px;}
+.bars{display:flex;align-items:flex-end;justify-content:space-between;gap:8px;height:170px;}
+.bars .bar{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:6px;}
+.bars .bar .b{
+  width:100%;max-width:38px;border-radius:8px 8px 0 0;
+  background:linear-gradient(180deg,var(--c-main-light),var(--c-main));
+  position:relative;animation:grow 1.1s ease-out both;transform-origin:bottom;
+}
+.bars .bar .b span{position:absolute;top:-20px;left:50%;transform:translateX(-50%);font-size:11px;font-weight:900;color:var(--c-main);white-space:nowrap;}
+.bars .bar em{font-size:11px;font-style:normal;font-weight:700;color:var(--c-text);}
+@keyframes grow{from{transform:scaleY(0)}to{transform:scaleY(1)}}
+
+/* ---------- 研修・教育 ---------- */
+.training{background:var(--bg-pink2);padding:66px 0 76px;}
+.training-card{
+  display:grid;grid-template-columns:1fr 1fr;gap:30px;align-items:center;
+  background:#fff;border-radius:24px;padding:32px 30px;box-shadow:var(--shadow);
+}
+@media(max-width:720px){.training-card{grid-template-columns:1fr;}}
+.photo-ph{
+  border-radius:18px;background:linear-gradient(135deg,#FBDCE9,#CFE9F5);
+  aspect-ratio:4/3;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  color:var(--c-main-dark);font-weight:900;gap:8px;overflow:hidden;
+}
+.photo-ph .ic{font-size:52px;}
+.photo-ph small{font-size:12px;opacity:.75;}
+.training-text h3{font-size:clamp(18px,3vw,23px);font-weight:900;color:var(--c-main-dark);line-height:1.5;margin-bottom:12px;}
+.training-text h3 .marker{background:linear-gradient(transparent 62%,#FBD6E5 62%);}
+.training-text p{font-size:14.5px;margin-bottom:14px;}
+.training-text .step-mini{display:grid;gap:8px;}
+.training-text .step-mini li{
+  background:var(--bg-pink);border-radius:10px;padding:9px 14px;font-size:13px;font-weight:700;
+  border-left:5px solid var(--c-main);
+}
+
+/* ---------- スタッフインタビュー ---------- */
+.interview{background:#fff;padding:66px 0 76px;}
+.iv-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;}
+@media(max-width:720px){.iv-grid{grid-template-columns:1fr;}}
+.iv-card{
+  background:var(--bg-pink);border-radius:22px;padding:28px 26px;box-shadow:var(--shadow);position:relative;
+}
+.iv-head{display:flex;align-items:center;gap:14px;margin-bottom:14px;}
+.iv-avatar{
+  width:66px;height:66px;border-radius:50%;flex-shrink:0;
+  background:linear-gradient(135deg,#FBDCE9,#F7C6DC);display:flex;align-items:center;justify-content:center;font-size:34px;
+}
+.iv-card:nth-child(2) .iv-avatar{background:linear-gradient(135deg,#CFE9F5,#B3DDF0);}
+.iv-head .who .name{display:block;font-weight:900;font-size:17px;color:var(--c-text-dark);}
+.iv-head .who .role{
+  display:inline-block;margin-top:3px;background:var(--c-main);color:#fff;font-weight:900;font-size:12px;
+  border-radius:50px;padding:3px 14px;
+}
+.iv-card:nth-child(2) .who .role{background:var(--c-accent);}
+.iv-q{font-weight:900;color:var(--c-main-dark);font-size:14.5px;margin:14px 0 6px;padding-left:24px;position:relative;}
+.iv-q::before{content:"Q.";position:absolute;left:0;color:var(--c-main);font-family:"M PLUS Rounded 1c",sans-serif;}
+.iv-card:nth-child(2) .iv-q::before{color:var(--c-accent);}
+.iv-a{font-size:13.5px;}
+
+/* ---------- 選考フロー ---------- */
+.flow{background:var(--bg-pink);padding:66px 0 70px;}
+.flow-list{max-width:600px;margin:0 auto;display:grid;gap:0;}
+.flow-item{
+  background:#fff;border-radius:18px;box-shadow:var(--shadow);
+  padding:20px 24px;display:flex;gap:18px;align-items:center;position:relative;
+}
+.flow-item + .flow-item{margin-top:34px;}
+.flow-item + .flow-item::before{
+  content:"▼";position:absolute;top:-29px;left:50%;transform:translateX(-50%);color:var(--c-main);font-size:18px;
+}
+.flow-num{
+  flex-shrink:0;width:56px;height:56px;border-radius:50%;
+  background:linear-gradient(135deg,var(--c-main),var(--c-main-light));color:#fff;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  font-family:"M PLUS Rounded 1c",sans-serif;font-weight:800;line-height:1;box-shadow:0 4px 0 var(--c-main-dark);
+}
+.flow-num small{font-size:9px;font-weight:700;}
+.flow-num b{font-size:24px;}
+.flow-item h3{font-size:clamp(16px,2.4vw,19px);font-weight:900;color:var(--c-text-dark);}
+.flow-item h3 .ic{margin-right:6px;}
+.flow-item p{font-size:13px;margin-top:3px;}
+
+/* ---------- 施設情報 ---------- */
+.facility{background:#fff;padding:66px 0 76px;}
+.fac-grid{
+  display:grid;grid-template-columns:1fr 1fr;gap:30px;align-items:stretch;
+  background:var(--bg-pink);border-radius:24px;box-shadow:var(--shadow);padding:30px;
+}
+@media(max-width:760px){.fac-grid{grid-template-columns:1fr;}}
+.fac-info h3{font-size:clamp(18px,3vw,22px);font-weight:900;color:var(--c-main-dark);margin-bottom:12px;}
+.info-table{width:100%;border-collapse:collapse;font-size:14px;}
+.info-table th,.info-table td{padding:12px 6px;border-bottom:2px dashed #F3C9DC;text-align:left;vertical-align:top;}
+.info-table tr:last-child th,.info-table tr:last-child td{border-bottom:none;}
+.info-table th{width:88px;color:var(--c-main-dark);font-weight:900;white-space:nowrap;}
+.info-table .note{font-size:11px;color:#a07d8d;display:block;margin-top:3px;}
+.fac-map{
+  border-radius:18px;overflow:hidden;min-height:280px;position:relative;
+  background:linear-gradient(135deg,#CFE9F5,#FBDCE9);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  color:var(--c-main-dark);font-weight:900;gap:8px;text-align:center;padding:20px;
+}
+.fac-map .ic{font-size:52px;}
+.fac-map small{font-size:12px;font-weight:700;opacity:.8;}
+.fac-map iframe{position:absolute;inset:0;width:100%;height:100%;border:0;}
+
+/* ---------- 求人情報 ---------- */
+.recruit{background:var(--bg-pink2);padding:66px 0 78px;}
+.tabs{display:flex;justify-content:center;gap:12px;}
+.tab-btn{
+  flex:1;max-width:260px;font-family:inherit;font-weight:900;font-size:clamp(15px,2.4vw,18px);
+  padding:15px 10px 13px;border:none;cursor:pointer;border-radius:18px 18px 0 0;
+  background:#F3C9DC;color:#a05475;transition:background .2s,color .2s;position:relative;top:2px;
+}
+.tab-btn.active{background:var(--c-main);color:#fff;top:0;}
+.tab-btn:nth-child(2).active{background:var(--c-accent);}
+.tab-panel{display:none;background:#fff;border-radius:0 0 24px 24px;box-shadow:var(--shadow);padding:10px 0 26px;}
+.tab-panel.active{display:block;animation:fadein .4s;}
+.tab-panel .panel-head{text-align:center;font-weight:900;font-size:clamp(16px,2.6vw,20px);color:var(--c-main-dark);padding:16px 20px 4px;}
+#panel-kango .panel-head{color:var(--c-accent);}
+@keyframes fadein{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.spec-table{width:100%;border-collapse:collapse;font-size:14.5px;}
+.spec-table th,.spec-table td{padding:15px 20px;border-bottom:2px dashed #F3C9DC;vertical-align:top;text-align:left;}
+.spec-table tr:last-child th,.spec-table tr:last-child td{border-bottom:none;}
+.spec-table th{width:120px;color:var(--c-main-dark);font-weight:900;white-space:nowrap;}
+#panel-kango .spec-table th{color:var(--c-accent);}
+.spec-table td b.salary{font-size:20px;color:var(--c-red);}
+.spec-table td .note{font-size:12px;color:#a07d8d;display:block;margin-top:4px;}
+@media(max-width:560px){
+  .spec-table th,.spec-table td{display:block;width:100%;padding:10px 20px;}
+  .spec-table th{padding-bottom:0;border-bottom:none;}
+}
+
+/* ---------- 応募フォーム ---------- */
+.form-sec{background:linear-gradient(180deg,var(--bg-pink),var(--bg-pink2));padding:66px 0 88px;}
+.form-linebox{
+  max-width:600px;margin:0 auto 30px;background:#fff;border:3px solid var(--c-line);
+  border-radius:22px;padding:26px 24px;text-align:center;position:relative;
+}
+.form-linebox .ribbon{
+  position:absolute;top:-17px;left:50%;transform:translateX(-50%);
+  background:var(--c-line);color:#fff;font-weight:900;font-size:13px;border-radius:50px;padding:6px 24px;white-space:nowrap;
+}
+.form-linebox h3{font-size:clamp(16px,2.6vw,20px);font-weight:900;color:var(--c-text-dark);margin:8px 0 6px;}
+.form-linebox p{font-size:13px;margin-bottom:16px;}
+.form-linebox p b{color:var(--c-line);}
+.form-or{text-align:center;font-weight:900;color:var(--c-main-dark);font-size:14px;margin:0 auto 22px;max-width:600px;position:relative;}
+.form-or::before,.form-or::after{content:"";position:absolute;top:50%;width:34%;height:2px;background:#F3C9DC;}
+.form-or::before{left:0;}.form-or::after{right:0;}
+.form-card{max-width:600px;margin:0 auto;background:#fff;border-radius:24px;box-shadow:var(--shadow);padding:38px 32px;}
+@media(max-width:560px){.form-card{padding:28px 20px;}}
+.form-row{margin-bottom:22px;}
+.form-row label{display:flex;align-items:center;gap:8px;font-weight:900;font-size:14.5px;color:var(--c-text-dark);margin-bottom:8px;}
+.req,.opt{font-size:10.5px;font-weight:900;color:#fff;border-radius:4px;padding:2px 8px;flex-shrink:0;}
+.req{background:var(--c-red);}
+.opt{background:#c39aab;}
+.form-row input[type=text],.form-row input[type=tel],.form-row input[type=email],
+.form-row select,.form-row textarea{
+  width:100%;font-family:inherit;font-size:15px;color:var(--c-text-dark);
+  background:var(--bg-pink);border:2px solid #F3C9DC;border-radius:12px;padding:13px 16px;
+  transition:border-color .2s,background .2s;
+}
+.form-row textarea{min-height:110px;resize:vertical;}
+.form-row input:focus,.form-row select:focus,.form-row textarea:focus{outline:none;border-color:var(--c-main);background:#fff;}
+.form-row .radio-group{display:flex;gap:12px;flex-wrap:wrap;}
+.radio-pill{position:relative;}
+.radio-pill input{position:absolute;opacity:0;}
+.radio-pill span{
+  display:inline-block;border:2px solid #F3C9DC;background:var(--bg-pink);border-radius:50px;
+  padding:9px 22px;font-weight:700;font-size:14px;cursor:pointer;transition:all .2s;
+}
+.radio-pill input:checked + span{background:var(--c-main);border-color:var(--c-main);color:#fff;font-weight:900;}
+.form-err{display:none;color:var(--c-red);font-size:12px;font-weight:700;margin-top:5px;}
+.form-row.error .form-err{display:block;}
+.form-row.error input,.form-row.error select{border-color:var(--c-red);background:#FFF4F7;}
+.form-submit{text-align:center;margin-top:28px;}
+.form-submit .btn{width:100%;max-width:380px;font-size:19px;padding:20px;}
+.form-note{font-size:11.5px;color:#a07d8d;text-align:center;margin-top:14px;}
+.form-thanks{display:none;text-align:center;padding:30px 10px;}
+.form-thanks .ic{font-size:56px;margin-bottom:10px;}
+.form-thanks h3{font-size:20px;font-weight:900;color:var(--c-main-dark);margin-bottom:10px;}
+.form-thanks p{font-size:14px;}
+
+/* ---------- フッター ---------- */
+footer{background:var(--c-main);color:#fff;text-align:center;padding:36px 20px 110px;}
+footer .f-logo{font-weight:900;font-size:20px;margin-bottom:6px;letter-spacing:.03em;}
+footer .f-addr{font-size:12.5px;opacity:.95;margin-bottom:14px;}
+footer .copy{font-size:11px;opacity:.85;}
+
+/* ---------- 追従CTA ---------- */
+.fixed-cta{
+  position:fixed;left:0;right:0;bottom:0;z-index:99;background:rgba(255,255,255,.97);backdrop-filter:blur(6px);
+  box-shadow:0 -4px 16px rgba(200,80,130,.2);padding:10px 14px;display:flex;justify-content:center;gap:10px;
+  transform:translateY(110%);transition:transform .35s ease;
+}
+.fixed-cta.show{transform:none;}
+.fixed-cta .btn{padding:12px 20px;font-size:14px;flex:1;max-width:260px;}
+.fixed-cta .btn-line{padding-left:42px;}
+.fixed-cta .btn-line::before{width:22px;height:22px;left:14px;}
+
+/* ---------- アニメ・トップ ---------- */
+.fade{opacity:0;transform:translateY(26px);transition:opacity .7s ease,transform .7s ease;}
+.fade.visible{opacity:1;transform:none;}
+.pagetop{
+  position:fixed;right:16px;bottom:86px;z-index:98;width:46px;height:46px;border-radius:50%;
+  background:var(--c-main);color:#fff;border:none;cursor:pointer;font-size:20px;
+  box-shadow:var(--shadow);opacity:0;pointer-events:none;transition:opacity .3s;
+}
+.pagetop.show{opacity:1;pointer-events:auto;}
+</style>
+</head>
+<body>
+
+<!--
+============================================================
+ デザイナー・コーダー向けメモ（公開前に差し替えてください）
+------------------------------------------------------------
+ ・LINE友だち登録URL … 現在は仮リンク（https://lin.ee/xxxxxxx）。実URLへ一括置換。
+ ・応募フォーム送信先 … <script>末尾の「送信処理」に送信先（Googleフォーム/API等）を実装。
+ ・電話番号・住所・拠点数・給与など数値 … 確定情報に差し替え。
+ ・「※写真が入ります」のプレースホルダー … FV／研修／施設写真を差し込み。
+ ・Google Map … 正式住所確定後に iframe を差し込み。
+============================================================
+-->
+
+<!-- ============ ヘッダー ============ -->
+<header>
+  <div class="header-inner">
+    <div class="logo">
+      <div class="logo-mark">🌿</div>
+      <div class="logo-text">
+        <small>看護・介護のお仕事</small>
+        <strong>ケアライフ</strong>
+      </div>
+    </div>
+    <div class="header-cta">
+      <div class="header-tel">
+        <a class="num" href="tel:0120000000">0120-000-000</a>
+        <small>受付 9:00〜18:00（土日祝除く）</small>
+      </div>
+      <a class="header-btn" href="#form">応募・お問い合わせ</a>
+    </div>
+  </div>
+</header>
+
+<!-- ============ ヒーロー ============ -->
+<section class="hero" id="top">
+  <div class="inner">
+    <p class="hero-badge-top">🌸 2024年秋オープン予定</p>
+    <p class="service-tag">看護・介護</p>
+    <h1><span class="pink big">オープニングスタッフ</span><br>募集中！</h1>
+    <div class="hero-photo">
+      <span class="ic">🏢</span>
+      <span>新規オープン施設・外観</span>
+      <small>※イメージ写真が入ります</small>
+    </div>
+    <ul class="hero-points">
+      <li><span>未経験・<br>ブランク<strong>歓迎</strong></span></li>
+      <li><span>選べる<br><strong>働き方</strong></span></li>
+      <li><span>全国<br><strong>展開中</strong></span></li>
+    </ul>
+    <div class="hero-cta">
+      <p class="lead">＼ <span class="pop">まずは気軽に！</span> LINEで応募・見学OK ／</p>
+      <a class="btn btn-line" href="https://lin.ee/xxxxxxx" target="_blank" rel="noopener">
+        <span>LINEで友だち登録する<small>10秒で完了！質問だけでもOK</small></span>
+      </a>
+      <a class="btn btn-ghost" href="#recruit">求人情報をみる <span class="arrow">▼</span></a>
+    </div>
+    <div class="hero-illust" aria-hidden="true">
+      <span>👩‍⚕️</span><span>🧑‍🦽</span><span>💗</span><span>👵</span><span>🧑‍⚕️</span>
+    </div>
+  </div>
+  <div class="wave"><svg viewBox="0 0 1440 56" preserveAspectRatio="none"><path d="M0,28 C240,56 480,0 720,28 C960,56 1200,0 1440,28 L1440,56 L0,56 Z" fill="#fff"/></svg></div>
+</section>
+
+<!-- ============ 特徴（全国展開） ============ -->
+<section class="feature">
+  <div class="inner">
+    <div class="sec-head fade">
+      <span class="en">Feature</span>
+      <h2><span class="marker">ケアライフ</span>の特徴</h2>
+      <div class="deco"><span></span><span></span><span></span></div>
+    </div>
+    <p class="feature-lead fade">全国に<b>50</b>拠点以上を展開！</p>
+    <p class="feature-sub fade">ケアライフは、訪問介護・デイサービス・看護をトータルで手がける成長企業です。全国規模の安定した基盤があるから、腰を据えて長く働けます。転居時も近くの拠点へ異動できる安心感が魅力です。</p>
+    <div class="feature-map fade">
+      <div class="map-ic" aria-hidden="true">🗾</div>
+      <ul class="feature-stats">
+        <li><b>50+</b><span>全国の拠点数</span></li>
+        <li><b>1,200+</b><span>働くスタッフ</span></li>
+        <li><b>15年</b><span>運営実績</span></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 選べる働き方 ============ -->
+<section class="workstyle">
+  <div class="wave wave-top"><svg viewBox="0 0 1440 56" preserveAspectRatio="none"><path d="M0,28 C240,56 480,0 720,28 C960,56 1200,0 1440,28 L1440,56 L0,56 Z" fill="#fff"/></svg></div>
+  <div class="inner" style="padding-top:56px;">
+    <div class="sec-head fade">
+      <span class="en">Work style</span>
+      <h2><span class="marker">選べる</span>働き方</h2>
+      <div class="deco"><span></span><span></span><span></span></div>
+    </div>
+    <div class="ws-grid">
+      <div class="ws-card fade">
+        <div class="ic">⏰</div>
+        <h3>時短勤務OK</h3>
+        <p>1日4時間〜相談可。家庭やプライベートと両立できます。</p>
+      </div>
+      <div class="ws-card fade">
+        <div class="ic">🔁</div>
+        <h3>Wワーク可</h3>
+        <p>副業・かけもちも歓迎。スキマ時間を活かして働けます。</p>
+      </div>
+      <div class="ws-card fade">
+        <div class="ic">📅</div>
+        <h3>週休2日制</h3>
+        <p>年間休日120日。しっかり休んで無理なく続けられます。</p>
+      </div>
+      <div class="ws-card fade">
+        <div class="ic">🕒</div>
+        <h3>曜日・時間が選べる</h3>
+        <p>シフトの希望を最大限考慮。あなたのペースで働けます。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ キャリアアップ ============ -->
+<section class="career">
+  <div class="inner">
+    <div class="sec-head fade">
+      <span class="en">Career up</span>
+      <h2>独自の<span class="marker">キャリアアップ</span>制度</h2>
+      <div class="deco"><span></span><span></span><span></span></div>
+    </div>
+    <div class="career-card fade">
+      <div class="career-text">
+        <h3>頑張りが<span class="marker">給与とポジション</span>に<br>きちんと反映されます</h3>
+        <p>明確な評価基準にもとづき、努力とスキルアップを正当に評価。未経験からでも、資格取得やリーダー登用で着実にステップアップできる環境です。</p>
+        <ul class="ca-list">
+          <li>資格取得支援制度（受講費・受験費を会社が負担）</li>
+          <li>資格手当・役職手当でしっかり収入アップ</li>
+          <li>年1回以上の昇給・評価面談</li>
+          <li>リーダー・管理者へのキャリアパス</li>
+        </ul>
+      </div>
+      <div class="chart">
+        <p class="chart-title">年収モデル（イメージ）</p>
+        <div class="bars">
+          <div class="bar"><div class="b" style="height:42%;animation-delay:.1s"><span>300万</span></div><em>1年目</em></div>
+          <div class="bar"><div class="b" style="height:58%;animation-delay:.25s"><span>350万</span></div><em>3年目</em></div>
+          <div class="bar"><div class="b" style="height:76%;animation-delay:.4s"><span>420万</span></div><em>5年目</em></div>
+          <div class="bar"><div class="b" style="height:100%;animation-delay:.55s"><span>500万〜</span></div><em>管理者</em></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 研修・教育 ============ -->
+<section class="training">
+  <div class="inner">
+    <div class="sec-head fade">
+      <span class="en">Training</span>
+      <h2>安心の<span class="marker">研修・教育</span>制度</h2>
+      <div class="deco"><span></span><span></span><span></span></div>
+    </div>
+    <div class="training-card fade">
+      <div class="photo-ph"><span class="ic">👩‍🏫</span><span>研修・勉強会の様子</span><small>※写真が入ります</small></div>
+      <div class="training-text">
+        <h3>未経験・ブランクありでも<br><span class="marker">安心してスタート</span>できます</h3>
+        <p>先輩スタッフによるマンツーマンのOJTと、段階的な研修カリキュラムをご用意。「はじめての介護・看護」でも、基礎からじっくり学べます。</p>
+        <ul class="step-mini">
+          <li>入職時研修（介護・医療の基礎／接遇マナー）</li>
+          <li>プリセプター制度で先輩がマンツーマンサポート</li>
+          <li>eラーニングでいつでも学べる環境</li>
+          <li>定期フォロー面談で不安を早めに解消</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ スタッフインタビュー ============ -->
+<section class="interview">
+  <div class="inner">
+    <div class="sec-head fade">
+      <span class="en">Interview</span>
+      <h2><span class="marker">スタッフ</span>インタビュー</h2>
+      <div class="deco"><span></span><span></span><span></span></div>
+    </div>
+    <div class="iv-grid">
+      <div class="iv-card fade">
+        <div class="iv-head">
+          <div class="iv-avatar">👩</div>
+          <div class="who"><span class="name">Aさん</span><span class="role">介護職</span></div>
+        </div>
+        <p class="iv-q">未経験で不安はなかった？</p>
+        <p class="iv-a">正直、最初はドキドキでした。でも先輩がいつもそばで教えてくれて、少しずつできることが増える毎日が楽しいです。利用者さんの「ありがとう」がやりがいになっています。</p>
+        <p class="iv-q">働き方はどう？</p>
+        <p class="iv-a">子育てと両立しやすい時短シフトで働いています。急なお休みにもチームでフォローし合えるので、無理なく続けられています。</p>
+      </div>
+      <div class="iv-card fade">
+        <div class="iv-head">
+          <div class="iv-avatar">🧑‍⚕️</div>
+          <div class="who"><span class="name">Bさん</span><span class="role">看護職</span></div>
+        </div>
+        <p class="iv-q">この職場を選んだ理由は？</p>
+        <p class="iv-a">一人ひとりとじっくり向き合いたくて、地域に根ざしたケアライフを選びました。医療と介護が連携していて、チームで支える体制が整っているのが決め手でした。</p>
+        <p class="iv-q">今後の目標は？</p>
+        <p class="iv-a">資格取得支援を活かして、専門性を高めていきたいです。将来はリーダーとして後輩を支えられる存在になるのが目標です。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 選考フロー ============ -->
+<section class="flow">
+  <div class="inner">
+    <div class="sec-head fade">
+      <span class="en">Flow</span>
+      <h2><span class="marker">選考</span>フロー</h2>
+      <div class="deco"><span></span><span></span><span></span></div>
+    </div>
+    <ol class="flow-list">
+      <li class="flow-item fade">
+        <div class="flow-num"><small>STEP</small><b>1</b></div>
+        <div><h3><span class="ic">📝</span>ご応募・説明会</h3><p>LINEまたはフォームからご応募。まずは説明会・見学だけでもOK！</p></div>
+      </li>
+      <li class="flow-item fade">
+        <div class="flow-num"><small>STEP</small><b>2</b></div>
+        <div><h3><span class="ic">💬</span>面接</h3><p>あなたのご希望や働き方をお伺いします。1回のみ・私服OKです。</p></div>
+      </li>
+      <li class="flow-item fade">
+        <div class="flow-num"><small>STEP</small><b>3</b></div>
+        <div><h3><span class="ic">🎉</span>内定</h3><p>最短即日〜1週間でご連絡。入職日はご相談のうえ決定します。</p></div>
+      </li>
+      <li class="flow-item fade">
+        <div class="flow-num"><small>STEP</small><b>4</b></div>
+        <div><h3><span class="ic">🌱</span>入社</h3><p>研修からスタートするので安心。オープニングメンバーとして活躍！</p></div>
+      </li>
+    </ol>
+  </div>
+</section>
+
+<!-- ============ 施設情報 ============ -->
+<section class="facility">
+  <div class="inner">
+    <div class="sec-head fade">
+      <span class="en">Facility</span>
+      <h2><span class="marker">施設</span>情報</h2>
+      <div class="deco"><span></span><span></span><span></span></div>
+    </div>
+    <div class="fac-grid fade">
+      <div class="fac-info">
+        <h3>ケアライフ ○○（新規オープン）</h3>
+        <table class="info-table">
+          <tr><th>施設名</th><td>ケアライフ ○○<br>（訪問介護・デイサービス）</td></tr>
+          <tr><th>所在地</th><td>〒000-0000<br>○○県○○市○○町0-0-0<span class="note">※正式な住所は決定次第差し替え</span></td></tr>
+          <tr><th>アクセス</th><td>△△線「○○」駅から徒歩5分／車通勤OK（駐車場あり）</td></tr>
+          <tr><th>電話</th><td><a href="tel:0120000000" style="color:var(--c-main-dark);font-weight:900;">0120-000-000</a>（受付 9:00〜18:00）</td></tr>
+          <tr><th>開設予定</th><td>2024年秋オープン予定</td></tr>
+        </table>
+      </div>
+      <!-- ▼ Google Map：正式住所が決定したら iframe を差し込んでください -->
+      <div class="fac-map">
+        <span class="ic">🗺️</span>
+        <span>Google Map</span>
+        <small>※開設後、地図を差し込みます</small>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 求人情報 ============ -->
+<section class="recruit" id="recruit">
+  <div class="inner">
+    <div class="sec-head fade">
+      <span class="en">Recruit</span>
+      <h2><span class="marker">求人</span>情報</h2>
+      <div class="deco"><span></span><span></span><span></span></div>
+    </div>
+
+    <div class="fade">
+      <div class="tabs" role="tablist">
+        <button class="tab-btn active" id="tab-kaigo" role="tab" aria-selected="true" aria-controls="panel-kaigo" onclick="switchTab('kaigo')">介護スタッフ</button>
+        <button class="tab-btn" id="tab-kango" role="tab" aria-selected="false" aria-controls="panel-kango" onclick="switchTab('kango')">看護スタッフ</button>
+      </div>
+
+      <!-- 介護 -->
+      <div class="tab-panel active" id="panel-kaigo" role="tabpanel" aria-labelledby="tab-kaigo">
+        <p class="panel-head">介護スタッフ（正社員・パート）</p>
+        <table class="spec-table">
+          <tr><th>仕事内容</th><td>訪問介護・デイサービスでの身体介護・生活援助、レクリエーションの企画・実施、記録作成など<span class="note">※できる業務から少しずつお任せします</span></td></tr>
+          <tr><th>応募資格</th><td>介護職員初任者研修以上をお持ちの方／未経験・ブランクのある方も歓迎<span class="note">※無資格の方は資格取得支援制度をご利用いただけます</span></td></tr>
+          <tr><th>給与</th><td><b class="salary">月給 240,000円〜320,000円</b><span class="note">※経験・資格を考慮／パートは時給1,200円〜／各種手当・賞与年2回</span></td></tr>
+          <tr><th>勤務時間</th><td>9:00〜18:00（実働8時間・休憩60分）<span class="note">※時短勤務・シフト相談可／1日4時間〜OK</span></td></tr>
+          <tr><th>休日休暇</th><td>週休2日制／年間休日120日／有給休暇／夏季・年末年始休暇／産休・育休（取得実績あり）</td></tr>
+          <tr><th>待遇・福利厚生</th><td>社会保険完備／交通費支給／資格取得支援／車通勤OK／制服貸与／退職金制度</td></tr>
+        </table>
+      </div>
+
+      <!-- 看護 -->
+      <div class="tab-panel" id="panel-kango" role="tabpanel" aria-labelledby="tab-kango">
+        <p class="panel-head">看護スタッフ（正社員・パート）</p>
+        <table class="spec-table">
+          <tr><th>仕事内容</th><td>利用者さまの健康管理・服薬管理・医療的ケア、介護スタッフへの助言、関係機関との連携など<span class="note">※オンコール体制はチームで分担します</span></td></tr>
+          <tr><th>応募資格</th><td>正看護師または准看護師の資格をお持ちの方／ブランクのある方も歓迎<span class="note">※普通自動車免許（AT可）があれば尚可</span></td></tr>
+          <tr><th>給与</th><td><b class="salary">月給 300,000円〜400,000円</b><span class="note">※経験・能力を考慮／パートは時給1,800円〜／各種手当・賞与年2回</span></td></tr>
+          <tr><th>勤務時間</th><td>9:00〜18:00（実働8時間・休憩60分）<span class="note">※時短勤務・シフト相談可／Wワーク相談可</span></td></tr>
+          <tr><th>休日休暇</th><td>週休2日制／年間休日120日／有給休暇／夏季・年末年始休暇／産休・育休（取得実績あり）</td></tr>
+          <tr><th>待遇・福利厚生</th><td>社会保険完備／交通費支給／資格取得支援／車通勤OK／制服貸与／退職金制度</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div style="text-align:center;margin-top:34px;" class="fade">
+      <a class="btn btn-pink" href="#form">この求人に応募する <span class="arrow">▶</span></a>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 応募フォーム ============ -->
+<section class="form-sec" id="form">
+  <div class="inner">
+    <div class="sec-head fade">
+      <span class="en">Entry</span>
+      <h2><span class="marker">応募</span>フォーム</h2>
+      <div class="deco"><span></span><span></span><span></span></div>
+    </div>
+
+    <div class="form-linebox fade">
+      <p class="ribbon">＼ いちばんカンタン！ ／</p>
+      <h3>LINEで応募・お問い合わせ</h3>
+      <p>友だち登録して<b>トークで応募完結</b>。「見学だけ」「質問だけ」もお気軽にどうぞ！</p>
+      <a class="btn btn-line" href="https://lin.ee/xxxxxxx" target="_blank" rel="noopener">
+        <span>LINE公式アカウント<small>友だち登録はこちら</small></span>
+      </a>
+    </div>
+
+    <p class="form-or fade">または、フォームから</p>
+
+    <div class="form-card fade">
+      <form id="entryForm" novalidate>
+        <div class="form-row" data-name="お名前">
+          <label for="f-name"><span class="req">必須</span>お名前</label>
+          <input type="text" id="f-name" name="name" placeholder="例）山田 花子" autocomplete="name" required>
+          <p class="form-err">お名前を入力してください</p>
+        </div>
+        <div class="form-row" data-name="ご希望の職種">
+          <label><span class="req">必須</span>ご希望の職種</label>
+          <div class="radio-group">
+            <label class="radio-pill"><input type="radio" name="job" value="介護スタッフ" required><span>介護スタッフ</span></label>
+            <label class="radio-pill"><input type="radio" name="job" value="看護スタッフ"><span>看護スタッフ</span></label>
+            <label class="radio-pill"><input type="radio" name="job" value="相談したい"><span>迷っている・相談したい</span></label>
+          </div>
+          <p class="form-err">職種を選択してください</p>
+        </div>
+        <div class="form-row" data-name="ご希望の勤務地">
+          <label for="f-area"><span class="opt">任意</span>ご希望の勤務地</label>
+          <select id="f-area" name="area">
+            <option value="">選択してください</option>
+            <option>新規オープン施設（○○）</option>
+            <option>お近くの拠点を相談したい</option>
+            <option>どこでもOK</option>
+          </select>
+        </div>
+        <div class="form-row" data-name="電話番号">
+          <label for="f-tel"><span class="req">必須</span>電話番号</label>
+          <input type="tel" id="f-tel" name="tel" placeholder="例）090-1234-5678" autocomplete="tel" required>
+          <p class="form-err">電話番号を正しく入力してください</p>
+        </div>
+        <div class="form-row" data-name="メールアドレス">
+          <label for="f-mail"><span class="req">必須</span>メールアドレス</label>
+          <input type="email" id="f-mail" name="email" placeholder="例）example@mail.com" autocomplete="email" required>
+          <p class="form-err">メールアドレスを正しく入力してください</p>
+        </div>
+        <div class="form-row" data-name="お問い合わせ内容">
+          <label for="f-msg"><span class="opt">任意</span>お問い合わせ内容</label>
+          <textarea id="f-msg" name="message" placeholder="例）まずは見学を希望します／土曜の面接は可能ですか？ など"></textarea>
+        </div>
+        <div class="form-submit">
+          <button type="submit" class="btn btn-pink">応募内容を送信する <span class="arrow">▶</span></button>
+          <p class="form-note">送信いただいた個人情報は採用選考の目的にのみ利用し、適切に管理いたします。</p>
+        </div>
+      </form>
+      <div class="form-thanks" id="formThanks">
+        <p class="ic">🎉</p>
+        <h3>ご応募ありがとうございます！</h3>
+        <p>担当者より<b>2営業日以内</b>にご連絡いたします。<br>お急ぎの方はLINEまたはお電話でもお気軽にどうぞ。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ フッター ============ -->
+<footer>
+  <p class="f-logo">🌿 ケアライフ</p>
+  <p class="f-addr">〒000-0000 ○○県○○市○○町0-0-0 ／ TEL 0120-000-000（受付 9:00〜18:00 土日祝除く）</p>
+  <p class="copy">© CareLife All Rights Reserved.</p>
+</footer>
+
+<!-- ============ 追従CTA ============ -->
+<div class="fixed-cta" id="fixedCta">
+  <a class="btn btn-line" href="https://lin.ee/xxxxxxx" target="_blank" rel="noopener">LINEで応募</a>
+  <a class="btn btn-pink" href="#form">応募フォームへ</a>
+</div>
+
+<button class="pagetop" id="pagetop" aria-label="ページ上部へ戻る">▲</button>
+
+<script>
+/* ========== タブ切り替え（求人情報） ========== */
+function switchTab(key){
+  document.querySelectorAll('.tab-btn').forEach(function(b){
+    var active = b.id === 'tab-' + key;
+    b.classList.toggle('active', active);
+    b.setAttribute('aria-selected', active);
+  });
+  document.querySelectorAll('.tab-panel').forEach(function(p){
+    p.classList.toggle('active', p.id === 'panel-' + key);
+  });
+}
+
+/* ========== スクロールフェードイン ========== */
+var observer = new IntersectionObserver(function(entries){
+  entries.forEach(function(entry){
+    if(entry.isIntersecting){
+      entry.target.classList.add('visible');
+      observer.unobserve(entry.target);
+    }
+  });
+},{threshold:.15, rootMargin:'0px 0px -40px 0px'});
+document.querySelectorAll('.fade').forEach(function(el){ observer.observe(el); });
+
+/* ========== 追従CTA & ページトップ ========== */
+var fixedCta = document.getElementById('fixedCta');
+var pagetop  = document.getElementById('pagetop');
+var hero     = document.querySelector('.hero');
+var formSec  = document.getElementById('form');
+window.addEventListener('scroll', function(){
+  var y = window.scrollY;
+  var pastHero = y > hero.offsetHeight - 100;
+  var formRect = formSec.getBoundingClientRect();
+  var onForm = formRect.top < window.innerHeight && formRect.bottom > 0;
+  fixedCta.classList.toggle('show', pastHero && !onForm);
+  pagetop.classList.toggle('show', y > 600);
+},{passive:true});
+pagetop.addEventListener('click', function(){ window.scrollTo({top:0, behavior:'smooth'}); });
+
+/* ========== 応募フォーム（バリデーション＋送信デモ） ========== */
+document.getElementById('entryForm').addEventListener('submit', function(e){
+  e.preventDefault();
+  var form = e.target;
+  var valid = true;
+  var firstError = null;
+  function setError(row, isErr){
+    row.classList.toggle('error', isErr);
+    if(isErr){ valid = false; if(!firstError) firstError = row; }
+  }
+  setError(form.querySelector('[data-name="お名前"]'), !form.name.value.trim());
+  setError(form.querySelector('[data-name="ご希望の職種"]'), !form.querySelector('input[name="job"]:checked'));
+  setError(form.querySelector('[data-name="電話番号"]'), !/^[0-9\-+() ]{10,15}$/.test(form.tel.value.trim()));
+  setError(form.querySelector('[data-name="メールアドレス"]'), !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.value.trim()));
+  if(!valid){ firstError.scrollIntoView({behavior:'smooth', block:'center'}); return; }
+  // 送信処理：仮でGoogleフォーム／メール送信API等に接続してください（送信先が決まったらここで送信）
+  form.style.display = 'none';
+  document.getElementById('formThanks').style.display = 'block';
+  document.getElementById('formThanks').scrollIntoView({behavior:'smooth', block:'center'});
+});
+</script>
+</body>
+</html>
