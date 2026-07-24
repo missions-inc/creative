@@ -45,6 +45,8 @@ a{color:inherit;text-decoration:none;}
 ul,ol{list-style:none;}
 .inner{max-width:960px;margin:0 auto;padding:0 20px;}
 section{position:relative;}
+.sp-only{display:none;}
+@media(max-width:560px){.sp-only{display:inline;}}
 
 /* ---------- 共通見出し ---------- */
 .sec-head{text-align:center;margin-bottom:44px;}
@@ -385,18 +387,50 @@ header{
 .msg-body h3 small{font-size:13px;font-weight:700;color:var(--c-text);margin-left:8px;}
 .msg-body p{font-size:14.5px;margin-bottom:10px;}
 
+/* ---------- 施設情報・アクセス ---------- */
+.access{background:var(--bg-cream);padding:70px 0 80px;}
+.access-card{
+  background:#fff;border-radius:24px;box-shadow:var(--shadow);overflow:hidden;
+  display:grid;grid-template-columns:1fr 1fr;
+}
+@media(max-width:720px){.access-card{grid-template-columns:1fr;}}
+.access-info{padding:34px 30px;}
+.access-info h3{
+  font-size:clamp(18px,3vw,22px);font-weight:900;color:var(--c-text-dark);
+  margin-bottom:18px;line-height:1.5;
+}
+.access-info h3 span{color:var(--c-main);}
+.access-table{width:100%;border-collapse:collapse;font-size:14px;}
+.access-table th,.access-table td{
+  padding:12px 4px;border-bottom:2px dashed #F0E3C6;vertical-align:top;text-align:left;
+}
+.access-table tr:last-child th,.access-table tr:last-child td{border-bottom:none;}
+.access-table th{width:96px;color:var(--c-main-dark);font-weight:900;white-space:nowrap;}
+.access-map{
+  min-height:280px;background:linear-gradient(135deg,#DFF5D0,#D9F0FF);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  color:var(--c-main-dark);font-weight:900;gap:8px;position:relative;
+}
+.access-map .pin{font-size:52px;filter:drop-shadow(0 4px 4px rgba(0,0,0,.15));}
+.access-map small{font-size:12px;opacity:.75;font-weight:700;}
+.access-map .mapchip{
+  position:absolute;top:14px;left:14px;background:#fff;color:var(--c-main-dark);
+  font-weight:900;font-size:11px;border-radius:50px;padding:4px 14px;box-shadow:var(--shadow);
+}
+
 /* ---------- 募集要項 ---------- */
-.recruit{background:var(--bg-cream);padding:70px 0 80px;}
+.recruit{background:var(--bg-cream2);padding:70px 0 80px;}
 .tabs{display:flex;justify-content:center;gap:12px;margin-bottom:0;}
 .tab-btn{
-  flex:1;max-width:280px;font-family:inherit;font-weight:900;
-  font-size:clamp(15px,2.4vw,19px);
-  padding:16px 10px 14px;border:none;cursor:pointer;
+  flex:1;max-width:240px;font-family:inherit;font-weight:900;
+  font-size:clamp(13px,2.2vw,18px);
+  padding:16px 8px 14px;border:none;cursor:pointer;
   border-radius:18px 18px 0 0;background:#EAD9B8;color:#8a7a5a;
-  transition:background .2s,color .2s;position:relative;top:2px;
+  transition:background .2s,color .2s;position:relative;top:2px;white-space:nowrap;
 }
 .tab-btn.active{background:var(--c-main);color:#fff;top:0;}
 .tab-btn:nth-child(2).active{background:var(--c-pink);}
+.tab-btn:nth-child(3).active{background:var(--c-teal);}
 .tab-panel{display:none;background:#fff;border-radius:0 0 24px 24px;box-shadow:var(--shadow);padding:12px 0 26px;}
 .tab-panel.active{display:block;animation:fadein .4s;}
 .tab-panel .panel-head{
@@ -404,6 +438,7 @@ header{
   color:var(--c-main-dark);padding:16px 20px 4px;
 }
 #panel-hoiku .panel-head{color:var(--c-pink);}
+#panel-shidou .panel-head{color:var(--c-teal);}
 @keyframes fadein{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 .spec-table{width:100%;border-collapse:collapse;font-size:14.5px;}
 .spec-table th,.spec-table td{
@@ -414,6 +449,7 @@ header{
   width:130px;color:var(--c-main-dark);font-weight:900;white-space:nowrap;
 }
 #panel-hoiku .spec-table th{color:var(--c-pink);}
+#panel-shidou .spec-table th{color:var(--c-teal);}
 .spec-table td b.salary{font-size:20px;color:var(--c-red);}
 .spec-table td .note{font-size:12px;color:#8a7a5a;display:block;margin-top:4px;}
 @media(max-width:560px){
@@ -599,7 +635,7 @@ footer .copy{font-size:11px;opacity:.85;}
     </div>
     <div class="header-cta">
       <div class="header-tel">
-        <a class="num" href="tel:0920000000">092-000-0000</a>
+        <a class="num" href="tel:0924036020">092-403-6020</a>
         <small>受付 10:00〜19:00（日祝除く）</small>
       </div>
       <a class="header-btn" href="#form">応募フォームへ</a>
@@ -670,7 +706,7 @@ footer .copy{font-size:11px;opacity:.85;}
   <div class="inner" style="padding-top:70px;">
     <div class="sec-head fade">
       <span class="en">About us</span>
-      <h2>発達こどもアカデミー<span class="marker">青葉台校</span>って？</h2>
+      <h2>発達こどもアカデミー<span class="marker">青葉台校</span><br class="sp-only">（はこでみ）って？</h2>
       <div class="deco"><span></span><span></span><span></span></div>
     </div>
     <div class="about-card fade">
@@ -822,6 +858,37 @@ footer .copy{font-size:11px;opacity:.85;}
   </div>
 </section>
 
+<!-- ============ 施設情報・アクセス ============ -->
+<section class="access" id="access">
+  <div class="inner">
+    <div class="sec-head fade">
+      <span class="en">Access</span>
+      <h2><span class="marker">はこでみ青葉台校</span>について</h2>
+      <div class="deco"><span></span><span></span><span></span></div>
+    </div>
+    <div class="access-card fade">
+      <div class="access-info">
+        <h3>駅チカ・通いやすい立地の<br><span>あたらしい教室</span>です</h3>
+        <table class="access-table">
+          <tr><th>事業所名</th><td>発達こどもアカデミー青葉台校（はこでみ）</td></tr>
+          <tr><th>事業種別</th><td>放課後等デイサービス／児童発達支援</td></tr>
+          <tr><th>所在地</th><td>〒000-0000 ○○県○○市青葉台0-0-0 ○○ビル1F</td></tr>
+          <tr><th>アクセス</th><td>「青葉台駅」より徒歩5分／駐車場あり</td></tr>
+          <tr><th>定員</th><td>1日10名（少人数制）</td></tr>
+          <tr><th>対象</th><td>発達に特性のある小学生〜高校生</td></tr>
+          <tr><th>開所日</th><td>月〜土（日曜・祝日 定休）</td></tr>
+          <tr><th>電話</th><td><a href="tel:0924036020" style="color:var(--c-main-dark);font-weight:900;">092-403-6020</a></td></tr>
+        </table>
+      </div>
+      <div class="access-map">
+        <span class="mapchip">Google Map</span>
+        <span class="pin">📍</span>
+        <small>※地図が入ります（Googleマップ埋め込み）</small>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- ============ 募集要項 ============ -->
 <section class="recruit" id="recruit">
   <div class="inner">
@@ -835,6 +902,7 @@ footer .copy{font-size:11px;opacity:.85;}
       <div class="tabs" role="tablist">
         <button class="tab-btn active" id="tab-jihatsu" role="tab" aria-selected="true" aria-controls="panel-jihatsu" onclick="switchTab('jihatsu')">児発管</button>
         <button class="tab-btn" id="tab-hoiku" role="tab" aria-selected="false" aria-controls="panel-hoiku" onclick="switchTab('hoiku')">保育士</button>
+        <button class="tab-btn" id="tab-shidou" role="tab" aria-selected="false" aria-controls="panel-shidou" onclick="switchTab('shidou')">児童指導員</button>
       </div>
 
       <!-- 児発管 -->
@@ -858,6 +926,20 @@ footer .copy{font-size:11px;opacity:.85;}
           <tr><th>仕事内容</th><td>発達に特性のあるお子さま（小学生〜高校生）への療育支援、遊び・学習のサポート、療育プログラムの企画・実施、記録作成（タブレット入力）<span class="note">※送迎業務はありません</span></td></tr>
           <tr><th>必須資格</th><td>保育士資格をお持ちの方<span class="note">※療育未経験・ブランクのある方も大歓迎！／児童指導員任用資格の方もご相談ください</span></td></tr>
           <tr><th>給与</th><td><b class="salary">月給 240,000円〜300,000円</b><span class="note">※経験・能力を考慮のうえ決定／賞与年2回／昇給年1回／各種手当含む</span></td></tr>
+          <tr><th>勤務時間</th><td>10:00〜19:00（実働8時間・休憩60分）<span class="note">※学校休業日は 9:00〜18:00／残業月平均2時間以下・持ち帰りゼロ</span></td></tr>
+          <tr><th>休日休暇</th><td>日曜・祝日 定休＋シフト休（週休2日制）／年間休日115日／有給休暇（取得率100%）／夏季・年末年始休暇／産休・育休（取得実績あり）</td></tr>
+          <tr><th>待遇・福利厚生</th><td>社会保険完備／交通費支給（上限あり）／資格取得支援（費用会社負担）／外部研修費補助／服装自由（動きやすい服装）</td></tr>
+          <tr><th>勤務地</th><td>発達こどもアカデミー青葉台校（駅から徒歩5分）</td></tr>
+        </table>
+      </div>
+
+      <!-- 児童指導員 -->
+      <div class="tab-panel" id="panel-shidou" role="tabpanel" aria-labelledby="tab-shidou">
+        <p class="panel-head">児童指導員（正社員）</p>
+        <table class="spec-table">
+          <tr><th>仕事内容</th><td>発達に特性のあるお子さま（小学生〜高校生）への療育支援、遊び・学習のサポート、療育プログラムの企画・実施、記録作成（タブレット入力）<span class="note">※送迎業務はありません</span></td></tr>
+          <tr><th>必須資格</th><td>児童指導員任用資格をお持ちの方（教員免許・社会福祉士・大学等での関連学科卒業など）<span class="note">※療育未経験・ブランクのある方も大歓迎！／保育士資格の方もご相談ください</span></td></tr>
+          <tr><th>給与</th><td><b class="salary">月給 235,000円〜295,000円</b><span class="note">※経験・能力を考慮のうえ決定／賞与年2回／昇給年1回／各種手当含む</span></td></tr>
           <tr><th>勤務時間</th><td>10:00〜19:00（実働8時間・休憩60分）<span class="note">※学校休業日は 9:00〜18:00／残業月平均2時間以下・持ち帰りゼロ</span></td></tr>
           <tr><th>休日休暇</th><td>日曜・祝日 定休＋シフト休（週休2日制）／年間休日115日／有給休暇（取得率100%）／夏季・年末年始休暇／産休・育休（取得実績あり）</td></tr>
           <tr><th>待遇・福利厚生</th><td>社会保険完備／交通費支給（上限あり）／資格取得支援（費用会社負担）／外部研修費補助／服装自由（動きやすい服装）</td></tr>
@@ -951,7 +1033,7 @@ footer .copy{font-size:11px;opacity:.85;}
   <div class="inner fade">
     <div class="tel-box">
       <p class="lbl">お電話でのご相談はこちら</p>
-      <a class="telnum" href="tel:0920000000">092-000-0000</a>
+      <a class="telnum" href="tel:0924036020">092-403-6020</a>
       <p class="time">受付時間 10:00〜19:00<b>（日・祝を除く）</b>／「求人ページを見た」とお伝えください</p>
     </div>
   </div>
@@ -977,6 +1059,7 @@ footer .copy{font-size:11px;opacity:.85;}
           <div class="radio-group">
             <label class="radio-pill"><input type="radio" name="job" value="児発管" required><span>児発管</span></label>
             <label class="radio-pill"><input type="radio" name="job" value="保育士"><span>保育士</span></label>
+            <label class="radio-pill"><input type="radio" name="job" value="児童指導員"><span>児童指導員</span></label>
             <label class="radio-pill"><input type="radio" name="job" value="相談したい"><span>迷っている・相談したい</span></label>
           </div>
           <p class="form-err">職種を選択してください</p>
@@ -987,7 +1070,9 @@ footer .copy{font-size:11px;opacity:.85;}
             <option value="">選択してください</option>
             <option>保育士</option>
             <option>児童発達支援管理責任者（要件を満たす）</option>
-            <option>幼稚園教諭</option>
+            <option>児童指導員任用資格</option>
+            <option>幼稚園教諭・教員免許</option>
+            <option>社会福祉士・精神保健福祉士</option>
             <option>その他・なし</option>
           </select>
         </div>
@@ -1013,7 +1098,7 @@ footer .copy{font-size:11px;opacity:.85;}
       <div class="form-thanks" id="formThanks">
         <p class="ic">🎉</p>
         <h3>ご応募ありがとうございます！</h3>
-        <p>担当者より<b>2営業日以内</b>にご連絡いたします。<br>お急ぎの方はお電話（092-000-0000）でもお気軽にどうぞ。</p>
+        <p>担当者より<b>2営業日以内</b>にご連絡いたします。<br>お急ぎの方はお電話（092-403-6020）でもお気軽にどうぞ。</p>
       </div>
     </div>
   </div>
@@ -1021,8 +1106,8 @@ footer .copy{font-size:11px;opacity:.85;}
 
 <!-- ============ フッター ============ -->
 <footer>
-  <p class="f-logo">🏠 放課後等デイサービス 発達こどもアカデミー青葉台校</p>
-  <p class="f-addr">〒000-0000 ○○県○○市青葉台0-0-0 ○○ビル1F ／ TEL 092-000-0000（受付 10:00〜19:00 日祝除く）</p>
+  <p class="f-logo">🏠 放課後等デイサービス 発達こどもアカデミー青葉台校（はこでみ）</p>
+  <p class="f-addr">〒000-0000 ○○県○○市青葉台0-0-0 ○○ビル1F ／ TEL 092-403-6020（受付 10:00〜19:00 日祝除く）</p>
   <p class="copy">© 発達こどもアカデミー青葉台校 All Rights Reserved.</p>
 </footer>
 
