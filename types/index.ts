@@ -32,6 +32,24 @@ export type Visibility =
   | { mode: "role_limited"; roles: Role[] }
   | { mode: "member_limited"; memberUids: string[] };
 
+export const VISIBILITY_MODE_LABELS: Record<VisibilityMode, string> = {
+  all: "全メンバー",
+  role_limited: "ロール限定",
+  member_limited: "メンバー限定",
+};
+
+/** visibility を人が読める短い文字列にする（一覧のバッジ表示など）。 */
+export function describeVisibility(v: Visibility): string {
+  switch (v.mode) {
+    case "all":
+      return "全メンバー";
+    case "role_limited":
+      return `ロール限定: ${v.roles.map((r) => ROLE_LABELS[r]).join("・") || "なし"}`;
+    case "member_limited":
+      return `メンバー限定: ${v.memberUids.length}名`;
+  }
+}
+
 // ---------------------------------------------------------------------------
 // タスクのステータス・優先度 — 仕様書 §3.5（固定値）
 // ---------------------------------------------------------------------------

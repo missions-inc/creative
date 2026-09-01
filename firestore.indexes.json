@@ -1,4 +1,37 @@
 {
-  "indexes": [],
+  "indexes": [
+    {
+      "collectionGroup": "projects",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "visibility.mode", "order": "ASCENDING" },
+        { "fieldPath": "visibility.roles", "arrayConfig": "CONTAINS" }
+      ]
+    },
+    {
+      "collectionGroup": "projects",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "visibility.mode", "order": "ASCENDING" },
+        { "fieldPath": "visibility.memberUids", "arrayConfig": "CONTAINS" }
+      ]
+    },
+    {
+      "collectionGroup": "tasks",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "visibility.mode", "order": "ASCENDING" },
+        { "fieldPath": "visibility.roles", "arrayConfig": "CONTAINS" }
+      ]
+    },
+    {
+      "collectionGroup": "tasks",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "visibility.mode", "order": "ASCENDING" },
+        { "fieldPath": "visibility.memberUids", "arrayConfig": "CONTAINS" }
+      ]
+    }
+  ],
   "fieldOverrides": []
 }

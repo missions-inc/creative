@@ -16,8 +16,11 @@ import {
   collection,
   doc,
   getDoc,
+  getDocs,
+  query,
   setDoc,
   updateDoc,
+  where,
 } from "firebase/firestore";
 
 import {
@@ -422,6 +425,128 @@ describe("タスク更新の不変条件", () => {
     await assertFails(
       updateDoc(doc(db, "tasks", "t3"), { visibility: visAll }),
     );
+  });
+});
+
+// ---------------------------------------------------------------------------
+// lib/firebase/queries.ts のクエリ戦略が実際にルールを通ることを検証する。
+// Firestore のルールは「フィルタ」ではないため、アクセスできないドキュメントを
+// 含みうるクエリはクエリ全体が拒否される。
+// ---------------------------------------------------------------------------
+describe("クエリ戦略（rules are not filters）", () => {
+  beforeEach(async () => {
+    await seedProject("p-all", visAll);
+    await seedProject("p-pm", visRole(["admin", "pm"]));
+    // member から見えるもの / 見えないものを混在させる
+    await seedTask("q-all", { projectId: "p-all", visibility: visAll });
+    await seedTask("q-pm", { projectId: "p-pm", visibility: visRole(["pm"]) });
+    await seedTask("q-assigned", {
+      projectId: "p-pm",
+      visibility: visRole(["pm"]), // member は visibility 外
+      assignees: [USERS.member.uid], // だが担当者
+    });
+  });
+
+  it("member による制約なしのタスク全件クエリは拒否される", async () => {
+    const db = authed(env, USERS.member.uid, USERS.member.email);
+    await assertFails(getDocs(collection(db, "tasks")));
+  });
+
+  it("admin は制約なしで全件取得できる", async () => {
+    const db = authed(env, USERS.admin.uid, USERS.admin.email);
+    await assertSucceeds(getDocs(collection(db, "tasks")));
+  });
+
+  it("visibility.mode == 'all' の制約付きクエリは成功する", async () => {
+    const db = authed(env, USERS.member.uid, USERS.member.email);
+    await assertSucceeds(
+      getDocs(query(collection(db, "tasks"), where("visibility.mode", "==", "all"))),
+    );
+  });
+
+  it("assignees array-contains の制約付きクエリは成功する（担当者常時アクセス）", async () => {
+    const db = authed(env, USERS.member.uid, USERS.member.email);
+    const snap = await assertSucceeds(
+      getDocs(
+        query(
+          collection(db, "tasks"),
+          where("assignees", "array-contains", USERS.member.uid),
+        ),
+      ),
+    );
+    expect(snap.docs.map((d) => d.id)).toContain("q-assigned");
+  });
+
+  it("role_limited は mode の等値制約と併用すれば成功する", async () => {
+    const db = authed(env, USERS.pm.uid, USERS.pm.email);
+    const snap = await assertSucceeds(
+      getDocs(
+        query(
+          collection(db, "tasks"),
+          where("visibility.mode", "==", "role_limited"),
+          where("visibility.roles", "array-contains", "pm"),
+        ),
+      ),
+    );
+    expect(snap.docs.map((d) => d.id).sort()).toEqual(["q-assigned", "q-pm"]);
+  });
+
+  // 回帰テスト: list ではルールが「クエリ」に対して評価されるため、
+  // mode の等値制約を省くと vis.mode を証明できず拒否される。
+  // lib/firebase/queries.ts は必ず mode の制約を併用すること。
+  it("mode の制約を省いた roles array-contains のみのクエリは拒否される", async () => {
+    const db = authed(env, USERS.pm.uid, USERS.pm.email);
+    await assertFails(
+      getDocs(
+        query(collection(db, "tasks"), where("visibility.roles", "array-contains", "pm")),
+      ),
+    );
+  });
+
+  it("member_limited も mode の等値制約と併用すれば成功する", async () => {
+    await seedTask("q-mem", {
+      projectId: "p-all",
+      visibility: visMembers([USERS.member.uid]),
+    });
+    const db = authed(env, USERS.member.uid, USERS.member.email);
+    const snap = await assertSucceeds(
+      getDocs(
+        query(
+          collection(db, "tasks"),
+          where("visibility.mode", "==", "member_limited"),
+          where("visibility.memberUids", "array-contains", USERS.member.uid),
+        ),
+      ),
+    );
+    expect(snap.docs.map((d) => d.id)).toEqual(["q-mem"]);
+  });
+
+  it("プロジェクトも同様: member の制約なし全件クエリは拒否される", async () => {
+    const db = authed(env, USERS.member.uid, USERS.member.email);
+    await assertFails(getDocs(collection(db, "projects")));
+  });
+
+  it("プロジェクト: mode=='all' 制約付きなら成功する", async () => {
+    const db = authed(env, USERS.member.uid, USERS.member.email);
+    await assertSucceeds(
+      getDocs(
+        query(collection(db, "projects"), where("visibility.mode", "==", "all")),
+      ),
+    );
+  });
+
+  it("プロジェクト: role_limited は mode + roles の併用で成功する", async () => {
+    const db = authed(env, USERS.pm.uid, USERS.pm.email);
+    const snap = await assertSucceeds(
+      getDocs(
+        query(
+          collection(db, "projects"),
+          where("visibility.mode", "==", "role_limited"),
+          where("visibility.roles", "array-contains", "pm"),
+        ),
+      ),
+    );
+    expect(snap.docs.map((d) => d.id)).toEqual(["p-pm"]);
   });
 });
 

@@ -16,7 +16,7 @@
  *   (3) プロジェクト変更時の自動追従（Cloud Functions・Phase 7）。
  * =============================================================================
  */
-import type { Role, Visibility } from "@/types";
+import type { Role, Visibility, VisibilityMode } from "@/types";
 
 /**
  * 公開範囲 `v` が、ロール `role` / UID `uid` のユーザーに閲覧を許可するか。
@@ -119,4 +119,59 @@ export function isValidVisibility(v: unknown): v is Visibility {
 /** タスク作成時の既定 visibility（プロジェクトの visibility を継承）。 */
 export function inheritVisibility(projectVisibility: Visibility): Visibility {
   return projectVisibility;
+}
+
+// ---------------------------------------------------------------------------
+// UI 用ヘルパー（「狭める方向のみ」へユーザーを誘導するため）
+// isNarrowerOrEqual と必ず整合させること。
+// ---------------------------------------------------------------------------
+
+/**
+ * 親 visibility のもとで、子が選択できるモード一覧。
+ *   親 all            → all / role_limited / member_limited
+ *   親 role_limited   → role_limited のみ（ロールは親の部分集合）
+ *   親 member_limited → member_limited のみ（メンバーは親の部分集合）
+ * 親が無い（プロジェクト自身）場合は全モード選択可。
+ */
+export function allowedChildModes(parent?: Visibility): VisibilityMode[] {
+  if (!parent || parent.mode === "all") {
+    return ["all", "role_limited", "member_limited"];
+  }
+  if (parent.mode === "role_limited") return ["role_limited"];
+  return ["member_limited"];
+}
+
+/** 親のもとで選択可能なロール一覧。 */
+export function selectableRoles(parent?: Visibility): Role[] {
+  if (!parent || parent.mode === "all") return ["admin", "pm", "member"];
+  if (parent.mode === "role_limited") return parent.roles;
+  return [];
+}
+
+/**
+ * 親のもとで選択可能なメンバー UID 一覧。
+ * null を返す場合は「制限なし（全メンバーから選択可）」を意味する。
+ */
+export function selectableMemberUids(parent?: Visibility): string[] | null {
+  if (!parent || parent.mode === "all") return null;
+  if (parent.mode === "member_limited") return parent.memberUids;
+  return [];
+}
+
+/**
+ * 子 visibility が親に対して妥当かを検証し、UI 表示用のエラーメッセージを返す。
+ * 問題なければ null。
+ */
+export function validateNarrowing(
+  child: Visibility,
+  parent?: Visibility,
+): string | null {
+  if (!isValidVisibility(child)) return "公開範囲の設定が不正です。";
+  if (!parent) return null;
+  if (isNarrowerOrEqual(child, parent)) return null;
+
+  if (parent.mode === "role_limited" && child.mode === "member_limited") {
+    return "ロール限定のプロジェクトでは、タスクをメンバー限定にできません（各メンバーのロールを検証できないため）。特定の人だけに見せたい場合は担当者に設定してください（担当者は常にアクセスできます）。";
+  }
+  return "タスクの公開範囲は、プロジェクトの公開範囲と同じか、より狭い範囲にしてください。";
 }

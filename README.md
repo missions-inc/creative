@@ -144,5 +144,37 @@ firebase.json           Firebase 各種設定・エミュレータ設定
 > （各メンバーのロールをルールで安価に検証できないため）ルール上は拒否されます。
 > 特定個人へ限定したい場合は **担当者（assignees）** を使ってください（担当者は常時アクセス可）。
 
-### ⏳ Phase 3 以降
+### ✅ Phase 3 — クライアント／プロジェクト／タスクの CRUD
+- **クライアント**（`/clients`・Admin 限定）: 登録・編集・論理削除／復元
+- **プロジェクト**（`/projects`, `/projects/[projectId]`）: 作成・編集・論理削除／復元、クライアント別グルーピング表示、公開範囲設定 UI
+- **タスク**（`/tasks/[taskId]`）: 作成・編集・ステータス変更（一覧からも即変更可）・優先度・担当者複数選択・期日（年月日＋時間）
+- **公開範囲 UI**（`components/visibility/VisibilityEditor.tsx`）: 親の範囲外を選べないようモード／ロール／メンバーの選択肢自体を制限し、加えて `validateNarrowing` で警告。最終防御は Firestore ルール
+- 期日が近い／超過したタスクは一覧で色分け表示
+
+#### ⚠️ クエリ戦略（重要な実装上の知見）
+Firestore のセキュリティルールは**フィルタではない**。さらに `list`（クエリ）では
+ルールは「実ドキュメント」ではなく**クエリそのもの**に対して評価され、
+`resource.data` はクエリの制約から値を証明できるフィールドしか参照できない。
+
+そのため `lib/firebase/queries.ts` では公開範囲ごとにクエリを分割し、
+**必ず `visibility.mode` の等値制約を併用**している（省くと `vis.mode` を証明できず
+クエリ全体が拒否される。この挙動は回帰テストで固定済み）。
+
+| クエリ | 証明できるルールの分岐 |
+|---|---|
+| `mode == 'all'` | 全員可 |
+| `mode == 'role_limited'` + `roles array-contains <ロール>` | ロール限定 |
+| `mode == 'member_limited'` + `memberUids array-contains <UID>` | メンバー限定 |
+| `assignees array-contains <UID>` | 担当者常時アクセス |
+| （admin）制約なし | `isAdmin()` は `resource.data` を参照しない |
+
+これに伴い **複合インデックスが必要**（`firestore.indexes.json` に定義済み）。デプロイ時に反映してください:
+
+```bash
+pnpm dlx firebase-tools deploy --only firestore:indexes
+```
+
+- ルールテストは **50 ケース** に拡充（クエリ戦略の検証・回帰テストを含む）
+
+### ⏳ Phase 4 以降
 （各フェーズ完了時にここへ追記していきます）
