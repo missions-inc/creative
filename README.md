@@ -132,6 +132,17 @@ firebase.json           Firebase 各種設定・エミュレータ設定
 
 > ⚠️ 実際にログインを試すには `.env.local` に Firebase 設定値が必要です（未設定だとブラウザで初期化エラー）。
 
-### ⏳ Phase 2 — データモデルとセキュリティルール（予定）
+### ✅ Phase 2 — データモデルとセキュリティルール
+- 全コレクションの TypeScript 型（`types/index.ts`）と Firestore 変換層（`lib/firebase/converters.ts`、型付きコレクション参照）
+- **アクセス制御の唯一の真実**を `lib/access/visibility.ts` に集約（`visibilityAllows` / `canAccessProject` / `canAccessTask` / `isNarrowerOrEqual`）。クライアント表示・ルール・Cloud Functions で一貫させる（§6）
+- **Firestore ルール**（`firestore.rules`）: ロール別権限 + 公開範囲 `all/role_limited/member_limited` + **担当者常時アクセス**（境界ルール1）+ **狭める方向のみ**（境界ルール2）+ ロール自己昇格防止 + 初期管理者ブートストラップ
+- **Storage ルール**（`storage.rules`）: 添付の 10MB・形式制限に加え、`firestore.get` でタスクアクセスを検証
+- **ルール単体テスト**（`@firebase/rules-unit-testing` + Vitest、`tests/rules/`）: **40 ケースすべて green**
+  - 実行: `pnpm test:rules`（Firestore エミュレータを自動起動。Java 必須）
+
+> 「狭める方向のみ」は健全性最優先の保守的定義です。`role_limited` の親に対する `member_limited` の子は
+> （各メンバーのロールをルールで安価に検証できないため）ルール上は拒否されます。
+> 特定個人へ限定したい場合は **担当者（assignees）** を使ってください（担当者は常時アクセス可）。
+
 ### ⏳ Phase 3 以降
 （各フェーズ完了時にここへ追記していきます）

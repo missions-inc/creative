@@ -10,8 +10,8 @@
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
     "emulators": "firebase emulators:start --only auth,firestore,storage",
-    "test:rules": "firebase emulators:exec --only firestore,storage \"vitest run\"",
-    "test:rules:watch": "firebase emulators:exec --only firestore,storage \"vitest\""
+    "test:rules": "firebase emulators:exec --only firestore --project demo-task-mgmt \"vitest run\"",
+    "test:rules:watch": "firebase emulators:exec --only firestore --project demo-task-mgmt \"vitest\""
   },
   "dependencies": {
     "@radix-ui/react-slot": "^1.3.3",

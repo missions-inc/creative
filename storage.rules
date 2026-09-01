@@ -1,12 +1,83 @@
 rules_version = '2';
 
 // =============================================================================
-// Phase 0 プレースホルダ
+// Firebase Storage セキュリティルール
 // -----------------------------------------------------------------------------
-// 既定は「全拒否」。添付ファイルのサイズ・形式制限を含む実ルールは Phase 2 で実装。
+// 添付ファイルは path: task-attachments/{taskId}/{attachmentId}/{fileName}
+// - 1ファイル最大 10MB・許可形式のみ（§3.6）
+// - タスクにアクセスできる missions ユーザーのみ read/write/delete
+//   （アクセス判定は firestore.get で Firestore を参照し、
+//    lib/access/visibility.ts / firestore.rules と一致させる）
 // =============================================================================
 service firebase.storage {
   match /b/{bucket}/o {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    function isMissionsUser() {
+      return isSignedIn()
+        && request.auth.token.email != null
+        && request.auth.token.email_verified == true
+        && request.auth.token.email.lower().matches('.*@missions[.]co[.]jp');
+    }
+
+    // 許可 MIME タイプ（firestore.rules の isAllowedAttachmentType と一致）。
+    function isAllowedType(ct) {
+      return ct in [
+        'image/jpeg', 'image/png', 'image/gif', 'image/webp',
+        'application/pdf',
+        'application/msword',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        'application/vnd.ms-excel',
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        'application/vnd.ms-powerpoint',
+        'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+        'application/zip', 'application/x-zip-compressed'
+      ];
+    }
+
+    // ---- Firestore を参照したアクセス判定（visibility.ts と一致）----------
+    function fsUser() {
+      return firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data;
+    }
+    function myRole() {
+      return fsUser().role;
+    }
+    function isAdmin() {
+      return isMissionsUser()
+        && firestore.exists(/databases/(default)/documents/users/$(request.auth.uid))
+        && myRole() == 'admin';
+    }
+    function visAllows(vis, role, uid) {
+      return vis.mode == 'all'
+        || (vis.mode == 'role_limited' && (role in vis.roles))
+        || (vis.mode == 'member_limited' && (uid in vis.memberUids));
+    }
+    function taskData(taskId) {
+      return firestore.get(/databases/(default)/documents/tasks/$(taskId)).data;
+    }
+    // 境界ルール1: 担当者は常にアクセス可。
+    function canAccessTask(taskId) {
+      return isAdmin()
+        || (request.auth.uid in taskData(taskId).assignees)
+        || visAllows(taskData(taskId).visibility, myRole(), request.auth.uid);
+    }
+
+    // ---- 添付ファイル ------------------------------------------------------
+    match /task-attachments/{taskId}/{attachmentId}/{fileName} {
+      allow read: if isMissionsUser() && canAccessTask(taskId);
+
+      allow write: if isMissionsUser()
+        && canAccessTask(taskId)
+        && request.resource.size > 0
+        && request.resource.size <= 10 * 1024 * 1024
+        && isAllowedType(request.resource.contentType);
+
+      allow delete: if isMissionsUser() && canAccessTask(taskId);
+    }
+
+    // それ以外は全拒否。
     match /{allPaths=**} {
       allow read, write: if false;
     }

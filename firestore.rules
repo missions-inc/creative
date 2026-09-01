@@ -1,13 +1,315 @@
 rules_version = '2';
 
 // =============================================================================
-// Phase 0 プレースホルダ
+// Firestore セキュリティルール（このアプリの中核）
 // -----------------------------------------------------------------------------
-// 既定は「全拒否」。実際のロール別・公開範囲別ルールは Phase 2 で実装する。
-// （セーフデフォルト：ルール未整備の状態で誤ってデータが露出しないようにする）
+// 判定ロジックは lib/access/visibility.ts と一致させること（仕様書 §6）。
+// 主要な境界ルール（§3.3）:
+//   (1) 担当者は常にアクセス可: canAccessTask = 担当者 OR visibility許可
+//   (2) 狭める方向のみ: task.visibility ⊆ project.visibility（isNarrowerOrEqual）
+//
+// 定数（lib/firebase/config.ts と一致）:
+//   許可ドメイン: missions.co.jp
+//   初期管理者 : s.matsumoto@missions.co.jp
 // =============================================================================
 service cloud.firestore {
   match /databases/{database}/documents {
+
+    // ---- 認証・ロール ------------------------------------------------------
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    // missions.co.jp ドメインの検証済みアカウントのみ許可。
+    // matches() は完全一致（前後アンカー）のため、サブドメイン詐称は通らない。
+    function isMissionsUser() {
+      return isSignedIn()
+        && request.auth.token.email != null
+        && request.auth.token.email_verified == true
+        && request.auth.token.email.lower().matches('.*@missions[.]co[.]jp');
+    }
+
+    function userPath(uid) {
+      return /databases/$(database)/documents/users/$(uid);
+    }
+    function userExists() {
+      return exists(userPath(request.auth.uid));
+    }
+    function myRole() {
+      return get(userPath(request.auth.uid)).data.role;
+    }
+    function isAdmin() {
+      return isMissionsUser() && userExists() && myRole() == 'admin';
+    }
+    function isPmOrAbove() {
+      return isMissionsUser() && userExists()
+        && (myRole() == 'admin' || myRole() == 'pm');
+    }
+
+    // ---- 公開範囲（visibility）ヘルパー -----------------------------------
+    // visibilityAllows: 担当者常時アクセスは含まない（呼び出し側で OR を取る）。
+    function visAllows(vis, role, uid) {
+      return vis.mode == 'all'
+        || (vis.mode == 'role_limited' && (role in vis.roles))
+        || (vis.mode == 'member_limited' && (uid in vis.memberUids));
+    }
+
+    function isValidVisibility(vis) {
+      return vis.mode == 'all'
+        || (vis.mode == 'role_limited'
+            && vis.roles is list
+            && vis.roles.hasOnly(['admin', 'pm', 'member']))
+        || (vis.mode == 'member_limited'
+            && vis.memberUids is list);
+    }
+
+    // 境界ルール2: child が parent と同じか、より狭い（部分集合）か。
+    // 健全性最優先（絶対に広げない）の保守的定義。visibility.ts と一致。
+    function isNarrowerOrEqual(child, parent) {
+      return parent.mode == 'all'
+        || (parent.mode == 'role_limited'
+            && child.mode == 'role_limited'
+            && child.roles.hasOnly(parent.roles))
+        || (parent.mode == 'member_limited'
+            && child.mode == 'member_limited'
+            && child.memberUids.hasOnly(parent.memberUids));
+    }
+
+    function isValidStatus(s) {
+      return s in ['not_started', 'in_progress', 'in_review', 'done'];
+    }
+    function isValidPriority(p) {
+      return p in ['high', 'mid', 'low'];
+    }
+
+    // 添付の許可 MIME タイプ（storage.rules と一致させること）。
+    function isAllowedAttachmentType(ct) {
+      return ct in [
+        'image/jpeg', 'image/png', 'image/gif', 'image/webp',
+        'application/pdf',
+        'application/msword',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        'application/vnd.ms-excel',
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        'application/vnd.ms-powerpoint',
+        'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+        'application/zip', 'application/x-zip-compressed'
+      ];
+    }
+
+    // ---- プロジェクト/タスクアクセス --------------------------------------
+    function projectPath(pid) {
+      return /databases/$(database)/documents/projects/$(pid);
+    }
+    function getProjectData(pid) {
+      return get(projectPath(pid)).data;
+    }
+    function canAccessProjectData(p) {
+      return isAdmin() || visAllows(p.visibility, myRole(), request.auth.uid);
+    }
+
+    function taskPath(tid) {
+      return /databases/$(database)/documents/tasks/$(tid);
+    }
+    function getTaskData(tid) {
+      return get(taskPath(tid)).data;
+    }
+    // 境界ルール1: 担当者は常にアクセス可。
+    function canAccessTaskData(t) {
+      return isAdmin()
+        || (request.auth.uid in t.assignees)
+        || visAllows(t.visibility, myRole(), request.auth.uid);
+    }
+
+    // =====================================================================
+    // users/{uid}
+    // =====================================================================
+    match /users/{uid} {
+      // 表示（担当者名・メンバー一覧・ロール参照）のため missions ユーザーは全件読める。
+      allow read: if isMissionsUser();
+
+      // 初回ログイン時の自己作成のみ。role のブートストラップを強制（§3.1）。
+      allow create: if isMissionsUser()
+        && request.auth.uid == uid
+        && request.resource.data.email == request.auth.token.email
+        && request.resource.data.keys().hasAll(['email', 'displayName', 'role', 'createdAt'])
+        && (
+          (request.auth.token.email.lower() == 's.matsumoto@missions.co.jp'
+            && request.resource.data.role == 'admin')
+          || (request.auth.token.email.lower() != 's.matsumoto@missions.co.jp'
+            && request.resource.data.role == 'member')
+        );
+
+      // admin は全ユーザーの role を変更可（メンバー管理）。
+      // 本人はプロフィールのみ変更可（role/email の自己変更は禁止 = 自己昇格防止）。
+      allow update: if isMissionsUser()
+        && request.resource.data.role in ['admin', 'pm', 'member']
+        && (
+          isAdmin()
+          || (
+            request.auth.uid == uid
+            && request.resource.data.role == resource.data.role
+            && request.resource.data.email == resource.data.email
+          )
+        );
+
+      allow delete: if isAdmin();
+
+      // FCM トークン（Phase 6）。本人のみ読み書き可。
+      match /fcmTokens/{token} {
+        allow read, write: if isMissionsUser() && request.auth.uid == uid;
+      }
+    }
+
+    // =====================================================================
+    // clients/{clientId}  — 登録・編集は admin のみ（§3.2）
+    // =====================================================================
+    match /clients/{clientId} {
+      allow read: if isMissionsUser();
+      allow create: if isAdmin()
+        && request.resource.data.name is string
+        && request.resource.data.isDeleted == false;
+      allow update: if isAdmin()
+        && request.resource.data.name is string;
+      // 物理削除はしない（論理削除 = update）。完全削除は Cloud Functions（Admin）。
+      allow delete: if false;
+    }
+
+    // =====================================================================
+    // projects/{projectId}  — 作成・編集・削除は pm 以上（§3.2）
+    // =====================================================================
+    match /projects/{projectId} {
+      allow read: if isMissionsUser() && canAccessProjectData(resource.data);
+
+      allow create: if isPmOrAbove()
+        && isValidVisibility(request.resource.data.visibility)
+        && request.resource.data.name is string
+        && request.resource.data.clientId is string
+        && request.resource.data.isDeleted == false;
+
+      // 編集・論理削除（isDeleted）・復元。client 変更は不可。
+      allow update: if isPmOrAbove()
+        && canAccessProjectData(resource.data)
+        && isValidVisibility(request.resource.data.visibility)
+        && request.resource.data.clientId == resource.data.clientId;
+
+      allow delete: if false;
+    }
+
+    // =====================================================================
+    // tasks/{taskId}
+    // =====================================================================
+    match /tasks/{taskId} {
+      allow read: if isMissionsUser() && canAccessTaskData(resource.data);
+
+      // 作成: プロジェクトにアクセスできる missions ユーザー。
+      //   - task.visibility ⊆ project.visibility（境界ルール2）
+      //   - clientId は project と一致、createdBy は本人、isDeleted=false
+      allow create: if isMissionsUser()
+        && request.resource.data.createdBy == request.auth.uid
+        && request.resource.data.isDeleted == false
+        && request.resource.data.assignees is list
+        && isValidStatus(request.resource.data.status)
+        && isValidPriority(request.resource.data.priority)
+        && isValidVisibility(request.resource.data.visibility)
+        && exists(projectPath(request.resource.data.projectId))
+        && canAccessProjectData(getProjectData(request.resource.data.projectId))
+        && request.resource.data.clientId == getProjectData(request.resource.data.projectId).clientId
+        && isNarrowerOrEqual(
+             request.resource.data.visibility,
+             getProjectData(request.resource.data.projectId).visibility
+           );
+
+      // 更新: 既存タスクにアクセスできること。
+      //   - createdBy / projectId / clientId は不変
+      //   - 変更後の visibility も project 以下（狭める方向のみ）
+      allow update: if isMissionsUser()
+        && canAccessTaskData(resource.data)
+        && request.resource.data.createdBy == resource.data.createdBy
+        && request.resource.data.projectId == resource.data.projectId
+        && request.resource.data.clientId == resource.data.clientId
+        && request.resource.data.assignees is list
+        && isValidStatus(request.resource.data.status)
+        && isValidPriority(request.resource.data.priority)
+        && isValidVisibility(request.resource.data.visibility)
+        && isNarrowerOrEqual(
+             request.resource.data.visibility,
+             getProjectData(resource.data.projectId).visibility
+           );
+
+      // 物理削除は不可（論理削除 = update）。完全削除は Cloud Functions（Admin）。
+      allow delete: if false;
+
+      // ---- コメント（スレッド形式）§3.7 --------------------------------
+      match /comments/{commentId} {
+        allow read: if isMissionsUser()
+          && canAccessTaskData(getTaskData(taskId));
+
+        allow create: if isMissionsUser()
+          && canAccessTaskData(getTaskData(taskId))
+          && request.resource.data.authorUid == request.auth.uid
+          && request.resource.data.isDeleted == false
+          && request.resource.data.body is string;
+
+        // 本人: 自分のコメントを編集/論理削除（authorUid 不変）。
+        // PM 以上: 他人のコメントを「論理削除のみ」（body は不変。編集は不可）。
+        allow update: if isMissionsUser()
+          && canAccessTaskData(getTaskData(taskId))
+          && (
+            (
+              resource.data.authorUid == request.auth.uid
+              && request.resource.data.authorUid == resource.data.authorUid
+            )
+            || (
+              isPmOrAbove()
+              && request.resource.data.isDeleted == true
+              && request.resource.data.authorUid == resource.data.authorUid
+              && request.resource.data.body == resource.data.body
+            )
+          );
+
+        allow delete: if false;
+      }
+
+      // ---- 添付ファイル（メタ情報）§3.6 --------------------------------
+      match /attachments/{attachmentId} {
+        allow read: if isMissionsUser()
+          && canAccessTaskData(getTaskData(taskId));
+
+        // 1ファイル最大 10MB・許可形式のみ（実体は Storage ルールでも制限）。
+        allow create: if isMissionsUser()
+          && canAccessTaskData(getTaskData(taskId))
+          && request.resource.data.uploadedBy == request.auth.uid
+          && request.resource.data.size is int
+          && request.resource.data.size > 0
+          && request.resource.data.size <= 10 * 1024 * 1024
+          && isAllowedAttachmentType(request.resource.data.contentType)
+          && request.resource.data.fileName is string
+          && request.resource.data.storagePath is string;
+
+        allow update: if false; // 添付メタは不変。
+        allow delete: if isMissionsUser()
+          && canAccessTaskData(getTaskData(taskId))
+          && (resource.data.uploadedBy == request.auth.uid || isPmOrAbove());
+      }
+    }
+
+    // =====================================================================
+    // notifications/{notificationId}  — 受信者のみ。作成は Cloud Functions。
+    // =====================================================================
+    match /notifications/{notificationId} {
+      allow read: if isMissionsUser()
+        && resource.data.toUid == request.auth.uid;
+      allow create: if false; // Cloud Functions（Admin SDK）のみが作成。
+      allow update: if isMissionsUser()
+        && resource.data.toUid == request.auth.uid
+        && request.resource.data.toUid == resource.data.toUid
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['isRead']);
+      allow delete: if isMissionsUser()
+        && resource.data.toUid == request.auth.uid;
+    }
+
+    // 明示的な全拒否（上記に一致しないパス）。
     match /{document=**} {
       allow read, write: if false;
     }
