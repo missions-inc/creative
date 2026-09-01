@@ -121,7 +121,17 @@ firebase.json           Firebase 各種設定・エミュレータ設定
 - Cloud Functions ディレクトリの雛形（実装は Phase 6/7）
 - 動作確認: `pnpm typecheck` / `pnpm build` が成功
 
-### ⏳ Phase 1 — 認証とロール基盤（予定）
+### ✅ Phase 1 — 認証とロール基盤
+- Google ログイン（`signInWithPopup`）。`hd` ヒント + アプリ側検証で **`missions.co.jp` ドメイン限定**（ドメイン外は即サインアウト + エラー表示）
+- 初回ログイン時に `users/{uid}` を作成。`s.matsumoto@missions.co.jp` は `admin` 自動付与、それ以外は `member`（`lib/firebase/users.ts`）
+- `AuthProvider`（`onAuthStateChanged` によるログイン状態管理）、`useAuth()` フック
+- `RequireAuth` による保護ルート、未ログイン時の `/login` リダイレクト、ログアウト
+- ルーティング: `/` → 状態に応じて `/dashboard` or `/login`、`/login`、`/dashboard`（保護エリア `(app)` グループ）
+- データモデルの型定義（`types/index.ts`）を先行整備
+- 動作確認: `pnpm typecheck` / `pnpm lint` / `pnpm build` 成功
+
+> ⚠️ 実際にログインを試すには `.env.local` に Firebase 設定値が必要です（未設定だとブラウザで初期化エラー）。
+
 ### ⏳ Phase 2 — データモデルとセキュリティルール（予定）
 ### ⏳ Phase 3 以降
 （各フェーズ完了時にここへ追記していきます）
