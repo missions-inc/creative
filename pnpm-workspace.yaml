@@ -1,0 +1,8 @@
+# pnpm ではビルドスクリプト許可をここで管理する。
+# ネイティブ拡張やビルドが必要な依存だけを明示的に許可（サプライチェーン対策）。
+allowBuilds:
+  '@firebase/util': true
+  esbuild: true
+  protobufjs: true
+  re2: true
+  unrs-resolver: true
