@@ -59,21 +59,30 @@ pnpm dev
 
 ```bash
 pnpm emulators           # Auth/Firestore/Storage エミュレータ起動
-pnpm test:rules          # セキュリティルールの単体テスト（Phase 2 で追加）
+pnpm test                # 単体テスト + ルールテスト
 ```
 
 ---
 
 ## デプロイ（概要 / 詳細は Phase 8 で最終化）
 
+デプロイ先プロジェクトは `.firebaserc` に設定済み（`missions-coorpolate`）。
+
 ```bash
 # 初回のみ: Firebase CLI ログインと Web Frameworks 実験機能の有効化
 pnpm dlx firebase-tools login
 pnpm dlx firebase-tools experiments:enable webframeworks
 
-# .firebaserc の "default" を実プロジェクト ID に書き換えたうえで
-pnpm dlx firebase-tools deploy --only firestore:rules,storage,hosting,functions
+# ルール・インデックス・Storage ルール
+pnpm dlx firebase-tools deploy --only firestore:rules,firestore:indexes,storage
+
+# アプリ本体（Hosting）と Cloud Functions
+pnpm dlx firebase-tools deploy --only hosting,functions
 ```
+
+> ⚠️ **`firestore:indexes` の反映は必須**です。member / pm でのプロジェクト・タスク一覧は
+> `visibility.mode` + `array-contains` の複合インデックスを使うため、未反映だと
+> "The query requires an index" で失敗します（admin は制約なしクエリのため影響を受けません）。
 
 ---
 
@@ -91,8 +100,18 @@ lib/
     config.ts           公開設定値・ドメイン判定
     client.ts           クライアント SDK 初期化（ブラウザ専用）
     admin.ts            Admin SDK 初期化（サーバー専用 / "server-only"）
+    converters.ts       型付きコレクション参照（読み出し）
+    mutations.ts        作成・更新・論理削除（書き込み）
+    queries.ts          公開範囲に応じたクエリ戦略（重要）
+  access/visibility.ts  アクセス制御判定の唯一の真実
+  tasks/filters.ts      期日間近・マイタスクの絞り込み（Phase 6 と共用）
+  date.ts               日時フォーマット・カレンダー日差分
   utils.ts              cn() ほかユーティリティ
-types/                  Firestore ドキュメントの型（Phase 2）
+hooks/useCollections.ts Firestore のリアルタイム購読フック
+types/                  Firestore ドキュメントの型
+tests/
+  unit/                 純粋ロジックの単体テスト（エミュレータ不要）
+  rules/                セキュリティルールのテスト（エミュレータ必須）
 functions/              Cloud Functions（通知・定期処理・自動追従）
 firestore.rules         Firestore セキュリティルール
 storage.rules           Storage セキュリティルール
@@ -176,5 +195,31 @@ pnpm dlx firebase-tools deploy --only firestore:indexes
 
 - ルールテストは **50 ケース** に拡充（クエリ戦略の検証・回帰テストを含む）
 
-### ⏳ Phase 4 以降
+### ✅ Phase 4 — 一覧画面・ダッシュボード
+`/dashboard` を 3 つのタブで構成（§3.9）。いずれもアクセス制御を反映し、見えないものは表示しない。
+
+| タブ | 内容 |
+|---|---|
+| **期日間近**【重要】 | 期日が「本日〜2日以内」の**未完了**タスク。加えて**期日超過**を上部に別枠で強調表示 |
+| **マイタスク** | ログイン中ユーザーが `assignees` に入っている未完了タスク |
+| **クライアント別** | クライアント ＞ プロジェクト ＞ タスクの階層で一括表示 |
+
+- タブに件数バッジ、タスク行に「本日／あとN日／N日超過」の相対表示と色分け（超過=赤・2日以内=橙）
+- 横断表示のタスク行にはクライアント／プロジェクトのパンくずを表示
+- 「期日間近」の定義は `lib/tasks/filters.ts` に集約。**Phase 6 の毎朝のリマインド通知と同じ判定を使う**（二重管理を避ける）
+- 階層表示は「担当者は常にアクセス可」により *プロジェクトは見えないがタスクだけ見える* ケースが起こりうるため、
+  そのタスクをクライアント直下の「プロジェクト外」としてまとめる
+- **単体テストを追加**（`tests/unit/`・エミュレータ不要）: 期日判定の境界、公開範囲の判定、
+  UI ヘルパー（`allowedChildModes` 等）が `isNarrowerOrEqual` と整合することを検証
+
+#### テストコマンド
+```bash
+pnpm test:unit    # 純粋ロジックの単体テスト（高速・エミュレータ不要）
+pnpm test:rules   # セキュリティルールのテスト（Firestore エミュレータ・Java 必須）
+pnpm test         # 上記の両方
+```
+
+現在のテスト数: **単体 24 / ルール 50**
+
+### ⏳ Phase 5 以降
 （各フェーズ完了時にここへ追記していきます）
