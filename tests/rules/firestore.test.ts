@@ -14,6 +14,7 @@ import {
 import {
   addDoc,
   collection,
+  deleteDoc,
   doc,
   getDoc,
   getDocs,
@@ -688,6 +689,134 @@ describe("通知（notifications）", () => {
         type: "assigned",
         taskId: "t9",
         isRead: false,
+        createdAt: now(),
+      }),
+    );
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Phase 5: コメントのスレッド構造とアクセス制御、添付の削除権限
+// ---------------------------------------------------------------------------
+describe("コメントのスレッド構造とアクセス制御", () => {
+  beforeEach(async () => {
+    await seedProject("p-all", visAll);
+    await seedTask("tc2", { projectId: "p-all", visibility: visAll });
+    // member だけが見えるタスク
+    await seedTask("t-private", {
+      projectId: "p-all",
+      visibility: visMembers([USERS.member.uid]),
+    });
+  });
+
+  it("parentId 付きの返信を作成できる", async () => {
+    const db = authed(env, USERS.member.uid, USERS.member.email);
+    const parent = await assertSucceeds(
+      addDoc(collection(db, "tasks", "tc2", "comments"), {
+        parentId: null,
+        authorUid: USERS.member.uid,
+        body: "親コメント",
+        isDeleted: false,
+        createdAt: now(),
+        editedAt: null,
+      }),
+    );
+    await assertSucceeds(
+      addDoc(collection(db, "tasks", "tc2", "comments"), {
+        parentId: parent.id,
+        authorUid: USERS.member.uid,
+        body: "返信",
+        isDeleted: false,
+        createdAt: now(),
+        editedAt: null,
+      }),
+    );
+  });
+
+  it("タスクを閲覧できないユーザーはコメントを読めない・書けない", async () => {
+    const db = authed(env, USERS.member2.uid, USERS.member2.email);
+    await assertFails(getDocs(collection(db, "tasks", "t-private", "comments")));
+    await assertFails(
+      addDoc(collection(db, "tasks", "t-private", "comments"), {
+        parentId: null,
+        authorUid: USERS.member2.uid,
+        body: "見えないはず",
+        isDeleted: false,
+        createdAt: now(),
+        editedAt: null,
+      }),
+    );
+  });
+
+  it("タスクを閲覧できるならコメント一覧を取得できる（制約なしクエリで可）", async () => {
+    const db = authed(env, USERS.member.uid, USERS.member.email);
+    await assertSucceeds(getDocs(collection(db, "tasks", "tc2", "comments")));
+  });
+
+  it("コメントの物理削除は不可（論理削除のみ）", async () => {
+    await env.withSecurityRulesDisabled(async (ctx) => {
+      await setDoc(doc(ctx.firestore(), "tasks", "tc2", "comments", "cm1"), {
+        parentId: null,
+        authorUid: USERS.member.uid,
+        body: "hi",
+        isDeleted: false,
+        createdAt: now(),
+      });
+    });
+    const db = authed(env, USERS.member.uid, USERS.member.email);
+    await assertFails(deleteDoc(doc(db, "tasks", "tc2", "comments", "cm1")));
+  });
+});
+
+describe("添付の削除権限（§3.6）", () => {
+  beforeEach(async () => {
+    await seedProject("p-all", visAll);
+    await seedTask("ta2", { projectId: "p-all", visibility: visAll });
+    await env.withSecurityRulesDisabled(async (ctx) => {
+      await setDoc(doc(ctx.firestore(), "tasks", "ta2", "attachments", "att1"), {
+        fileName: "a.png",
+        storagePath: "task-attachments/ta2/att1/a.png",
+        contentType: "image/png",
+        size: 1024,
+        uploadedBy: USERS.member.uid,
+        createdAt: now(),
+      });
+    });
+  });
+
+  it("アップロード者本人は削除できる", async () => {
+    const db = authed(env, USERS.member.uid, USERS.member.email);
+    await assertSucceeds(deleteDoc(doc(db, "tasks", "ta2", "attachments", "att1")));
+  });
+
+  it("PM 以上は他人の添付を削除できる", async () => {
+    const db = authed(env, USERS.pm.uid, USERS.pm.email);
+    await assertSucceeds(deleteDoc(doc(db, "tasks", "ta2", "attachments", "att1")));
+  });
+
+  it("他の一般メンバーは削除できない", async () => {
+    const db = authed(env, USERS.member2.uid, USERS.member2.email);
+    await assertFails(deleteDoc(doc(db, "tasks", "ta2", "attachments", "att1")));
+  });
+
+  it("添付メタは更新できない（不変）", async () => {
+    const db = authed(env, USERS.member.uid, USERS.member.email);
+    await assertFails(
+      updateDoc(doc(db, "tasks", "ta2", "attachments", "att1"), {
+        fileName: "renamed.png",
+      }),
+    );
+  });
+
+  it("uploadedBy を他人に偽装した作成は拒否", async () => {
+    const db = authed(env, USERS.member.uid, USERS.member.email);
+    await assertFails(
+      addDoc(collection(db, "tasks", "ta2", "attachments"), {
+        fileName: "b.png",
+        storagePath: "task-attachments/ta2/x/b.png",
+        contentType: "image/png",
+        size: 1024,
+        uploadedBy: USERS.member2.uid,
         createdAt: now(),
       }),
     );

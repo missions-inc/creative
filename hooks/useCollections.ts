@@ -7,16 +7,26 @@
  * 複合インデックス不要のクエリ構成にしているため）。
  */
 import { useEffect, useMemo, useState } from "react";
-import { onSnapshot, type FirestoreError } from "firebase/firestore";
+import {
+  onSnapshot,
+  orderBy,
+  query,
+  type FirestoreError,
+} from "firebase/firestore";
 
 import { useAuth } from "@/components/auth/AuthProvider";
-import { clientsCol, usersCol } from "@/lib/firebase/converters";
+import {
+  attachmentsCol,
+  clientsCol,
+  commentsCol,
+  usersCol,
+} from "@/lib/firebase/converters";
 import {
   accessibleProjectQueries,
   accessibleTaskQueries,
   subscribeMerged,
 } from "@/lib/firebase/queries";
-import type { AppUser, Client, Project, Task } from "@/types";
+import type { AppUser, Attachment, Client, Comment, Project, Task } from "@/types";
 
 interface CollectionState<T> {
   data: T[];
@@ -150,4 +160,54 @@ export function useTasks(options?: {
   );
 
   return { ...state, data };
+}
+
+/**
+ * タスクのコメント（作成日時の昇順）。
+ * 読み取りルールはコメント自身の内容を参照せず、親タスクへのアクセス可否のみを見るため、
+ * 制約なしのクエリで問題ない。
+ */
+export function useComments(taskId: string): CollectionState<Comment> {
+  const [state, setState] = useState<CollectionState<Comment>>(initialState);
+
+  useEffect(() => {
+    if (!taskId) return;
+    const unsub = onSnapshot(
+      query(commentsCol(taskId), orderBy("createdAt", "asc")),
+      (snap) =>
+        setState({
+          data: snap.docs.map((d) => d.data()),
+          loading: false,
+          error: null,
+        }),
+      (e: FirestoreError) =>
+        setState({ data: [], loading: false, error: e.message }),
+    );
+    return unsub;
+  }, [taskId]);
+
+  return state;
+}
+
+/** タスクの添付ファイル一覧（作成日時の昇順）。 */
+export function useAttachments(taskId: string): CollectionState<Attachment> {
+  const [state, setState] = useState<CollectionState<Attachment>>(initialState);
+
+  useEffect(() => {
+    if (!taskId) return;
+    const unsub = onSnapshot(
+      query(attachmentsCol(taskId), orderBy("createdAt", "asc")),
+      (snap) =>
+        setState({
+          data: snap.docs.map((d) => d.data()),
+          loading: false,
+          error: null,
+        }),
+      (e: FirestoreError) =>
+        setState({ data: [], loading: false, error: e.message }),
+    );
+    return unsub;
+  }, [taskId]);
+
+  return state;
 }

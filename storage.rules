@@ -49,6 +49,11 @@ service firebase.storage {
         && firestore.exists(/databases/(default)/documents/users/$(request.auth.uid))
         && myRole() == 'admin';
     }
+    function isPmOrAbove() {
+      return isMissionsUser()
+        && firestore.exists(/databases/(default)/documents/users/$(request.auth.uid))
+        && (myRole() == 'admin' || myRole() == 'pm');
+    }
     function visAllows(vis, role, uid) {
       return vis.mode == 'all'
         || (vis.mode == 'role_limited' && (role in vis.roles))
@@ -74,7 +79,18 @@ service firebase.storage {
         && request.resource.size <= 10 * 1024 * 1024
         && isAllowedType(request.resource.contentType);
 
-      allow delete: if isMissionsUser() && canAccessTask(taskId);
+      // 削除はアップロード者本人 or PM 以上のみ（firestore.rules の
+      // attachments delete と条件を一致させる）。
+      // メタ情報ドキュメントを参照するため、クライアントは
+      // 「実体 → メタ情報」の順で削除すること。
+      allow delete: if isMissionsUser()
+        && canAccessTask(taskId)
+        && (
+          firestore.get(
+            /databases/(default)/documents/tasks/$(taskId)/attachments/$(attachmentId)
+          ).data.uploadedBy == request.auth.uid
+          || isPmOrAbove()
+        );
     }
 
     // それ以外は全拒否。

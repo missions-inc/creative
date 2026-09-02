@@ -5,6 +5,8 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Pencil, RotateCcw, Trash2 } from "lucide-react";
 
+import { AttachmentPanel } from "@/components/attachments/AttachmentPanel";
+import { CommentThread } from "@/components/comments/CommentThread";
 import { TaskDialog } from "@/components/tasks/TaskDialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -166,9 +168,9 @@ export default function TaskDetailPage() {
         </Card>
       ) : null}
 
-      <p className="text-sm text-muted-foreground">
-        コメント・添付ファイルは Phase 5 で実装します。
-      </p>
+      <AttachmentPanel taskId={task.id} users={users} />
+
+      <CommentThread taskId={task.id} users={users} />
 
       {project ? (
         <TaskDialog
