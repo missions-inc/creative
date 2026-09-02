@@ -15,14 +15,16 @@ const NAV = [
   { href: "/projects", label: "プロジェクト" },
 ];
 
+const SETTINGS_NAV = { href: "/settings", label: "設定" };
+
 /** アプリ共通ヘッダー。ナビゲーション・ユーザー名・ロール・ログアウト。 */
 export function AppHeader() {
   const { appUser, signOut } = useAuth();
   const pathname = usePathname();
 
   const items = canManageClients(appUser?.role)
-    ? [...NAV, { href: "/clients", label: "クライアント" }]
-    : NAV;
+    ? [...NAV, { href: "/clients", label: "クライアント" }, SETTINGS_NAV]
+    : [...NAV, SETTINGS_NAV];
 
   return (
     <header className="sticky top-0 z-10 border-b bg-background/95 backdrop-blur">

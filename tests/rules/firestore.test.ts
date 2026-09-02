@@ -822,3 +822,62 @@ describe("添付の削除権限（§3.6）", () => {
     );
   });
 });
+
+// ---------------------------------------------------------------------------
+// Phase 6: FCM トークン（users/{uid}/fcmTokens）は本人のみ読み書き可
+// ---------------------------------------------------------------------------
+describe("FCM トークンの保護", () => {
+  it("本人は自分のトークンを保存・読み取りできる", async () => {
+    const db = authed(env, USERS.member.uid, USERS.member.email);
+    await assertSucceeds(
+      setDoc(doc(db, "users", USERS.member.uid, "fcmTokens", "token-abc"), {
+        token: "token-abc",
+        userAgent: "test",
+        createdAt: now(),
+        updatedAt: now(),
+      }),
+    );
+    await assertSucceeds(
+      getDoc(doc(db, "users", USERS.member.uid, "fcmTokens", "token-abc")),
+    );
+  });
+
+  it("他人のトークンは読み書きできない（admin であっても）", async () => {
+    await env.withSecurityRulesDisabled(async (ctx) => {
+      await setDoc(
+        doc(ctx.firestore(), "users", USERS.member.uid, "fcmTokens", "token-abc"),
+        { token: "token-abc", createdAt: now() },
+      );
+    });
+
+    const other = authed(env, USERS.member2.uid, USERS.member2.email);
+    await assertFails(
+      getDoc(doc(other, "users", USERS.member.uid, "fcmTokens", "token-abc")),
+    );
+    await assertFails(
+      setDoc(doc(other, "users", USERS.member.uid, "fcmTokens", "token-x"), {
+        token: "token-x",
+        createdAt: now(),
+      }),
+    );
+
+    // トークンは端末固有の情報のため、admin にも開放しない。
+    const admin = authed(env, USERS.admin.uid, USERS.admin.email);
+    await assertFails(
+      getDoc(doc(admin, "users", USERS.member.uid, "fcmTokens", "token-abc")),
+    );
+  });
+
+  it("本人は自分のトークンを削除できる", async () => {
+    await env.withSecurityRulesDisabled(async (ctx) => {
+      await setDoc(
+        doc(ctx.firestore(), "users", USERS.member.uid, "fcmTokens", "tk"),
+        { token: "tk", createdAt: now() },
+      );
+    });
+    const db = authed(env, USERS.member.uid, USERS.member.email);
+    await assertSucceeds(
+      deleteDoc(doc(db, "users", USERS.member.uid, "fcmTokens", "tk")),
+    );
+  });
+});

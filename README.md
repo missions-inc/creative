@@ -246,7 +246,56 @@ pnpm test         # 上記の両方
 > Storage の削除ルールはメタ情報ドキュメントの `uploadedBy` を参照するため、
 > クライアントは **実体 → メタ情報** の順に削除する必要がある（`deleteAttachment` がその順序）。
 
-現在のテスト数: **単体 35 / ルール 59**
+### ✅ Phase 6 — 通知（Web Push + FCM + Cloud Functions）
 
-### ⏳ Phase 6 以降
+**クライアント側**
+- `/settings` に通知設定画面。**現在の許可状態のバッジ表示**・有効化・**通知テスト送信**・無効化（§6）
+- Service Worker（`public/firebase-messaging-sw.js`）でバックグラウンド受信
+- フォアグラウンド受信はブラウザが通知を出さないため、アプリ内トースト（`ForegroundNotifications`）で表示
+- FCM トークンは `users/{uid}/fcmTokens/{token}` に保存。**本人以外は admin でも読めない**（端末固有情報のため）
+
+> Service Worker はビルド時の環境変数を読めないため、**登録時にクエリパラメータで設定値を渡している**。
+> 設定値をファイルにハードコードしていない。
+
+> ⚠️ サーバーは `webpush.notification` を含むペイロードを送るため、FCM SDK が
+> バックグラウンド通知を**自動表示**する。SW 内で `showNotification()` を呼ぶと**二重表示**になるので呼ばないこと。
+
+**Cloud Functions（`asia-northeast1`）**
+
+| 関数 | 種類 | 内容 |
+|---|---|---|
+| `onTaskWritten` | Firestore トリガー | 新規割り当て → 該当担当者へ／完了 → 作成者＋全担当者へ |
+| `dailyDueReminder` | スケジュール | **毎朝 9:00 JST**、期日が**当日**または**2日前**の未完了タスクの担当者へ |
+| `sendTestNotification` | 呼び出し可能 | 疎通確認用に自分宛へテスト送信 |
+
+- 無効になった FCM トークンは送信結果を見て自動削除
+- プッシュが届かなくても履歴が残るよう、`notifications` コレクションにも記録（作成は Admin SDK のみ）
+
+#### 期日リマインドの定義（重要）
+仕様どおり**当日(0日)と2日前(2日)ちょうど**が対象で、**1日前には送りません**。
+ダッシュボードの「期日間近」が 0〜2 日の*範囲*を表示するのとは異なります。
+
+Cloud Functions は UTC で動くため、カレンダー日の計算は **JST を明示**しています
+（`functions/src/shared/dueDates.ts`）。アプリ側（ブラウザのローカル時刻）とは実装が分かれるので、
+**両者の定数と判定結果が一致することを単体テストで突き合わせ**ています（`tests/unit/dueDates.test.ts`）。
+
+現在のテスト数: **単体 43 / ルール 62**
+
+#### 通知のデプロイと確認手順
+```bash
+# Cloud Functions をデプロイ（predeploy で自動的に TypeScript をビルド）
+pnpm dlx firebase-tools deploy --only functions
+
+# ルール（fcmTokens の保護を含む）も更新
+pnpm dlx firebase-tools deploy --only firestore:rules
+```
+
+1. アプリの `/settings` を開く → 「この端末で通知を有効にする」→ ブラウザの許可ダイアログで許可
+2. 「通知テスト送信」で疎通確認
+3. 実際のタスクに担当者を割り当て → 割り当てられた人に通知が届くか確認
+
+> `dailyDueReminder` は Cloud Scheduler を使うため **Blaze プラン**が必要です。
+> 初回デプロイ時に Cloud Scheduler API の有効化を求められる場合があります。
+
+### ⏳ Phase 7 以降
 （各フェーズ完了時にここへ追記していきます）

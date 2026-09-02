@@ -16,11 +16,24 @@ import {
   getStorage,
   type FirebaseStorage,
 } from "firebase/storage";
+import {
+  connectFunctionsEmulator,
+  getFunctions,
+  type Functions,
+} from "firebase/functions";
 
 import { firebaseConfig, USE_FIREBASE_EMULATORS } from "./config";
 
 let cachedApp: FirebaseApp | null = null;
-const emulatorConnected = { auth: false, firestore: false, storage: false };
+const emulatorConnected = {
+  auth: false,
+  firestore: false,
+  storage: false,
+  functions: false,
+};
+
+/** Cloud Functions のリージョン（functions/src/index.ts と一致させること）。 */
+export const FUNCTIONS_REGION = "asia-northeast1";
 
 /** Firebase App のシングルトンを返す（多重初期化を防ぐ）。 */
 export function getFirebaseApp(): FirebaseApp {
@@ -54,6 +67,15 @@ export function getFirebaseStorage(): FirebaseStorage {
     emulatorConnected.storage = true;
   }
   return storage;
+}
+
+export function getFirebaseFunctions(): Functions {
+  const functions = getFunctions(getFirebaseApp(), FUNCTIONS_REGION);
+  if (shouldConnectEmulator("functions")) {
+    connectFunctionsEmulator(functions, "127.0.0.1", 5001);
+    emulatorConnected.functions = true;
+  }
+  return functions;
 }
 
 /** ローカル開発時（ブラウザ）で、当該サービスがまだ未接続なら true。 */
