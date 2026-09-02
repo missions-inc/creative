@@ -3,6 +3,7 @@
  *
  * Phase 6 — 通知
  *   - onTaskWritten         : タスクの新規割り当て / 完了時に通知
+ *   - onCommentCreated      : コメント投稿時に担当者・作成者・既存コメント者へ通知
  *   - dailyDueReminder      : 毎朝 9:00 JST。期日リマインド（プッシュ）+
  *                             担当者別デイリーダイジェスト（メール）
  *   - sendTestNotification  : 疎通確認用のテスト送信（呼び出し可能関数）
@@ -22,6 +23,7 @@ initializeApp();
 setGlobalOptions({ region: "asia-northeast1", maxInstances: 10 });
 
 export { onTaskWritten } from "./taskTriggers";
+export { onCommentCreated } from "./commentTriggers";
 export { dailyDueReminder } from "./scheduled";
 export { sendTestNotification } from "./callable";
 export { onProjectWritten } from "./projectTriggers";

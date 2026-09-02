@@ -157,7 +157,7 @@ export interface Attachment {
 }
 
 /** notifications/{notificationId} */
-export type NotificationType = "assigned" | "completed" | "reminder";
+export type NotificationType = "assigned" | "completed" | "reminder" | "commented";
 
 export interface AppNotification {
   id: string;

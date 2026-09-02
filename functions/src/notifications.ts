@@ -10,7 +10,7 @@ import { getFirestore, FieldValue } from "firebase-admin/firestore";
 import { getMessaging } from "firebase-admin/messaging";
 import * as logger from "firebase-functions/logger";
 
-export type NotificationType = "assigned" | "completed" | "reminder";
+export type NotificationType = "assigned" | "completed" | "reminder" | "commented";
 
 /** 通知クリック時に開くアプリの URL。デプロイ環境に合わせて設定可能。 */
 const APP_BASE_URL =

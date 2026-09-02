@@ -166,6 +166,48 @@ firebase.json           Firebase 各種設定・エミュレータ設定
 
 ---
 
+## アイコン（ファビコン・通知・PWA）の差し替え手順
+
+アイコンは 3 ファイルあり、**すべて正方形の PNG** を用意して上書きするだけで差し替えられます。
+
+| ファイル | 用途 | 推奨サイズ |
+|---|---|---|
+| `app/icon.png` | ブラウザタブのファビコン | 512×512（Next.js が自動縮小） |
+| `public/icon-192.png` | プッシュ通知のアイコン・PWA | **192×192 固定** |
+| `public/icon-512.png` | PWA（インストール時・スプラッシュ） | **512×512 固定** |
+
+```bash
+# 元画像（正方形 PNG、512px 以上推奨）を icon-source.png として:
+cp icon-source.png app/icon.png
+sips -Z 512 icon-source.png --out public/icon-512.png   # macOS 標準コマンド
+sips -Z 192 icon-source.png --out public/icon-192.png
+
+# 反映
+git add app/icon.png public/icon-192.png public/icon-512.png
+git commit -m "アイコン差し替え"
+pnpm dlx firebase-tools deploy --only hosting
+```
+
+> - `public/` の 2 ファイルは**ファイル名とサイズを変えない**こと（マニフェストと通知ペイロードが参照しています）。
+> - 差し替え後、ブラウザタブに反映されない場合はハードリロード（Cmd+Shift+R）。
+>   通知アイコンは次の通知から新しい画像になります。
+
+## 通知の表示名について
+
+Chrome の通知には送信元の情報が表示されます。挙動は次のとおりです。
+
+- **通常のサイトとして使っている場合**: 通知タイトル・本文はアプリが指定したものが出ますが、
+  送信元として**サイトのオリジン**（例: `missions-coorpolate.web.app`。ローカル開発中は `localhost:3000`）が
+  Chrome によって併記されます。これはブラウザ仕様で、サイト側から完全には変更できません。
+- **PWA としてインストールした場合**: Web App Manifest（`app/manifest.ts`）の `name` が使われ、
+  通知は **「タスク管理」** というアプリ名で表示されます。
+  インストールは Chrome のアドレスバー右端のインストールアイコン、または
+  メニュー →「キャスト、保存、共有」→「ページをアプリとしてインストール」から行えます。
+
+日常的に通知を受け取るメンバーには **PWA としてのインストールを推奨**してください。
+
+---
+
 ## 事前準備（人間側 / コードでは作成不可）
 
 - Firebase プロジェクト作成
@@ -310,6 +352,7 @@ pnpm test         # 上記の両方
 | 関数 | 種類 | 内容 |
 |---|---|---|
 | `onTaskWritten` | Firestore トリガー | 新規割り当て → 該当担当者へ／完了 → 作成者＋全担当者へ |
+| `onCommentCreated` | Firestore トリガー | コメント投稿 → 担当者＋作成者＋既存コメント者へ（投稿者は除く） |
 | `dailyDueReminder` | スケジュール | **毎朝 9:00 JST**、期日が**当日**または**2日前**の未完了タスクの担当者へ |
 | `sendTestNotification` | 呼び出し可能 | 疎通確認用に自分宛へテスト送信 |
 
@@ -459,6 +502,13 @@ pnpm dlx firebase-tools deploy --only functions,firestore:indexes
 
 **README 最終化**
 - デプロイ手順をランブック化（初回セットアップ／通常デプロイ／動作確認チェックリスト）
+
+### ✅ 公開後の改善
+- **Web App Manifest**（`app/manifest.ts`）: `name`/`short_name` を「タスク管理」に。
+  PWA インストール時は通知が「タスク管理」名義で表示される（512px アイコンも追加）
+- **コメント通知**: コメント投稿時に「〇〇（タスク名）」に「△△（投稿者名）」がコメントしました を
+  担当者＋作成者＋既存コメント者へ送信（投稿者自身は除く / `onCommentCreated`）
+- アイコン差し替え手順を README に整備
 
 ---
 
