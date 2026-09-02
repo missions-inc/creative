@@ -80,6 +80,23 @@ pnpm dlx firebase-tools deploy --only firestore:rules,firestore:indexes,storage
 pnpm dlx firebase-tools deploy --only hosting,functions
 ```
 
+### ⚠️ 環境前提: 組織ポリシーと IAM（実運用で確認済み）
+
+この Google Cloud 組織では、組織ポリシーによりデフォルトのコンピュートサービスアカウント
+（`1062122390649-compute@developer.gserviceaccount.com`）へ権限が**自動付与されません**。
+新しい環境にデプロイする場合は、IAM で以下を手動付与してください。
+
+| ロール | 目的 |
+|---|---|
+| **Logs Writer**（`roles/logging.logWriter`） | Cloud Build のビルド失敗対策 |
+| **Cloud Datastore ユーザー**（`roles/datastore.user`） | Functions からの Firestore クエリ（PERMISSION_DENIED 対策） |
+| **Firebase Cloud Messaging API 管理者** | FCM でのプッシュ送信 |
+
+また、呼び出し可能関数（`sendTestNotification`）の Cloud Run サービスは
+**「パブリックアクセスを許可」**にする必要があります（コード側でも `invoker: "public"` を
+明示しているため通常は自動で設定されますが、組織ポリシーでブロックされた場合は
+Cloud Run コンソールから手動で許可してください。認可は関数内のログイン必須＋ドメイン制限で担保しています）。
+
 > ⚠️ **`firestore:indexes` の反映は必須**です。member / pm でのプロジェクト・タスク一覧は
 > `visibility.mode` + `array-contains` の複合インデックスを使うため、未反映だと
 > "The query requires an index" で失敗します（admin は制約なしクエリのため影響を受けません）。
@@ -279,8 +296,6 @@ Cloud Functions は UTC で動くため、カレンダー日の計算は **JST �
 （`functions/src/shared/dueDates.ts`）。アプリ側（ブラウザのローカル時刻）とは実装が分かれるので、
 **両者の定数と判定結果が一致することを単体テストで突き合わせ**ています（`tests/unit/dueDates.test.ts`）。
 
-現在のテスト数: **単体 43 / ルール 62**
-
 #### 通知のデプロイと確認手順
 ```bash
 # Cloud Functions をデプロイ（predeploy で自動的に TypeScript をビルド）
@@ -347,5 +362,57 @@ gcloud logging read \
 | 権限がありません | `missions.co.jp` 以外のアカウント |
 | 通知機能に接続できませんでした | 未デプロイ / invoker 権限不足（上記参照） |
 
-### ⏳ Phase 7 以降
+### ✅ Phase 7 — 削除・ゴミ箱・自動処理 ＋ Node.js 22 ＋ メールダイジェスト
+
+**ゴミ箱（`/trash`・§3.8）**
+- 削除済みのタスク・プロジェクト（admin はクライアントも）を一覧し、ワンクリックで復元
+- プロジェクトが削除中のタスクは個別復元できない（「先にプロジェクトを復元してください」を表示）
+- クライアントは参照整合性のため完全削除の対象外（論理削除のまま保持）
+
+**Cloud Functions（自動処理）**
+
+| 関数 | 種類 | 内容 |
+|---|---|---|
+| `onProjectWritten` | Firestore トリガー | ①プロジェクトの削除/復元を配下タスクへ連動 ②公開範囲変更時の自動追従（境界ルール3） |
+| `purgeTrash` | スケジュール（毎日 4:00 JST） | 削除から **30日** 経過したタスク・プロジェクトを完全削除（コメント・添付メタ・**Storage 実体**含む） |
+
+- 連動削除されたタスクには `deletedByProject` マーカーを付け、**プロジェクト復元時は連動削除分だけを復元**する
+  （プロジェクト削除より前に個別削除されていたタスクは復元しない）
+- 公開範囲の自動追従: プロジェクトを狭めたとき、**はみ出すタスクだけ**をプロジェクトと同じ範囲へ収める。
+  範囲内に収まっている個別設定はそのまま維持（§3.3 の確定仕様どおり）
+- 判定ロジックは `functions/src/shared/visibility.ts`。アプリ側 `lib/access/visibility.ts` と
+  **全組み合わせで一致することを単体テストで固定**（`tests/unit/visibilityParity.test.ts`）
+- purge 用の複合インデックス（`isDeleted` + `deletedAt`）を `firestore.indexes.json` に追加
+
+**ランタイム**
+- Cloud Functions を **Node.js 22** に更新（Node 20 は 2026-10-30 廃止予定のため）
+
+**デイリーダイジェスト（メール）**
+- 毎朝 9:00 JST のバッチ（`dailyDueReminder`）がプッシュリマインドに加えて送信
+- **担当者ごとに 1 通**。未完了タスクを「期日超過／本日期日／期日まで2日以内」に分けて一覧（テキスト + HTML）
+- **対象がゼロの人には送らない**
+- 送信は Gmail SMTP（Nodemailer）。認証情報はコードに置かず:
+  - `GMAIL_SMTP_USER` … `functions/.env`（`functions/.env.example` をコピー）
+  - `GMAIL_SMTP_PASSWORD` … **Secret Manager** で管理
+- **未設定の場合はメールだけをスキップ**して警告ログを残す（プッシュ通知には影響しない）
+
+#### ダイジェストメールの設定手順
+```bash
+# 1) 送信元アドレスを設定
+cp functions/.env.example functions/.env   # GMAIL_SMTP_USER を記入
+
+# 2) Gmail の「アプリ パスワード」を Secret Manager に登録
+#    （送信元アカウントで 2 段階認証を有効化 → https://myaccount.google.com/apppasswords で発行）
+pnpm dlx firebase-tools functions:secrets:set GMAIL_SMTP_PASSWORD
+
+# 3) デプロイ
+pnpm dlx firebase-tools deploy --only functions,firestore:indexes
+```
+
+> Gmail は通常のパスワードでは SMTP 認証できません。必ず**アプリ パスワード**を使ってください。
+> Secret 未登録のままデプロイすると CLI が対話的に値の入力を求めます。
+
+現在のテスト数: **単体 47 / ルール 62**
+
+### ⏳ Phase 8 — 仕上げ（予定）
 （各フェーズ完了時にここへ追記していきます）

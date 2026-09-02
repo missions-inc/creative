@@ -15,6 +15,7 @@ const NAV = [
   { href: "/projects", label: "プロジェクト" },
 ];
 
+const TRASH_NAV = { href: "/trash", label: "ゴミ箱" };
 const SETTINGS_NAV = { href: "/settings", label: "設定" };
 
 /** アプリ共通ヘッダー。ナビゲーション・ユーザー名・ロール・ログアウト。 */
@@ -23,8 +24,8 @@ export function AppHeader() {
   const pathname = usePathname();
 
   const items = canManageClients(appUser?.role)
-    ? [...NAV, { href: "/clients", label: "クライアント" }, SETTINGS_NAV]
-    : [...NAV, SETTINGS_NAV];
+    ? [...NAV, { href: "/clients", label: "クライアント" }, TRASH_NAV, SETTINGS_NAV]
+    : [...NAV, TRASH_NAV, SETTINGS_NAV];
 
   return (
     <header className="sticky top-0 z-10 border-b bg-background/95 backdrop-blur">

@@ -4,32 +4,84 @@
       "collectionGroup": "projects",
       "queryScope": "COLLECTION",
       "fields": [
-        { "fieldPath": "visibility.mode", "order": "ASCENDING" },
-        { "fieldPath": "visibility.roles", "arrayConfig": "CONTAINS" }
+        {
+          "fieldPath": "visibility.mode",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "visibility.roles",
+          "arrayConfig": "CONTAINS"
+        }
       ]
     },
     {
       "collectionGroup": "projects",
       "queryScope": "COLLECTION",
       "fields": [
-        { "fieldPath": "visibility.mode", "order": "ASCENDING" },
-        { "fieldPath": "visibility.memberUids", "arrayConfig": "CONTAINS" }
+        {
+          "fieldPath": "visibility.mode",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "visibility.memberUids",
+          "arrayConfig": "CONTAINS"
+        }
       ]
     },
     {
       "collectionGroup": "tasks",
       "queryScope": "COLLECTION",
       "fields": [
-        { "fieldPath": "visibility.mode", "order": "ASCENDING" },
-        { "fieldPath": "visibility.roles", "arrayConfig": "CONTAINS" }
+        {
+          "fieldPath": "visibility.mode",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "visibility.roles",
+          "arrayConfig": "CONTAINS"
+        }
       ]
     },
     {
       "collectionGroup": "tasks",
       "queryScope": "COLLECTION",
       "fields": [
-        { "fieldPath": "visibility.mode", "order": "ASCENDING" },
-        { "fieldPath": "visibility.memberUids", "arrayConfig": "CONTAINS" }
+        {
+          "fieldPath": "visibility.mode",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "visibility.memberUids",
+          "arrayConfig": "CONTAINS"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "tasks",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "isDeleted",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "deletedAt",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "projects",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "isDeleted",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "deletedAt",
+          "order": "ASCENDING"
+        }
       ]
     }
   ],

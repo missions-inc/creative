@@ -3,7 +3,7 @@
   "description": "Cloud Functions for Firebase — 通知・スケジュール処理・公開範囲追従・完全削除",
   "private": true,
   "engines": {
-    "node": "20"
+    "node": "22"
   },
   "main": "lib/index.js",
   "scripts": {
@@ -15,9 +15,11 @@
   },
   "dependencies": {
     "firebase-admin": "^13.0.0",
-    "firebase-functions": "^6.1.0"
+    "firebase-functions": "^6.1.0",
+    "nodemailer": "^9.1.1"
   },
   "devDependencies": {
+    "@types/nodemailer": "^8.0.1",
     "typescript": "^5.7.0"
   }
 }

@@ -44,6 +44,9 @@ serviceAccountKey.json
 # cloud functions build output
 functions/lib/
 functions/node_modules/
+# functions のローカル設定（GMAIL_SMTP_USER 等。example はコミットする）
+functions/.env
+functions/.env.*.local
 
 # testing
 /coverage

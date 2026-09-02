@@ -10,6 +10,7 @@
 import {
   addDoc,
   collection,
+  deleteField,
   doc,
   serverTimestamp,
   updateDoc,
@@ -142,11 +143,16 @@ export async function updateTaskStatus(id: string, status: TaskStatus) {
   });
 }
 
-/** タスクの論理削除／復元。 */
+/**
+ * タスクの論理削除／復元。
+ * 個別に復元した場合は、プロジェクト連動削除の印（deletedByProject）も外す
+ * （残っているとプロジェクト復元時に二重で復元対象になるため）。
+ */
 export async function setTaskDeleted(id: string, isDeleted: boolean) {
   return updateDoc(doc(getDb(), "tasks", id), {
     isDeleted,
     deletedAt: isDeleted ? serverTimestamp() : null,
+    ...(isDeleted ? {} : { deletedByProject: deleteField() }),
     updatedAt: serverTimestamp(),
   });
 }

@@ -128,6 +128,8 @@ export interface Task {
   createdBy: string;
   isDeleted: boolean;
   deletedAt?: Timestamp | null;
+  /** プロジェクト削除に連動してゴミ箱入りした印（Cloud Functions が付与・復元時に除去）。 */
+  deletedByProject?: boolean;
   createdAt: Timestamp;
   updatedAt: Timestamp;
 }
