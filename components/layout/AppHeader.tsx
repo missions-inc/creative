@@ -24,7 +24,13 @@ export function AppHeader() {
   const pathname = usePathname();
 
   const items = canManageClients(appUser?.role)
-    ? [...NAV, { href: "/clients", label: "クライアント" }, TRASH_NAV, SETTINGS_NAV]
+    ? [
+        ...NAV,
+        { href: "/clients", label: "クライアント" },
+        { href: "/members", label: "メンバー" },
+        TRASH_NAV,
+        SETTINGS_NAV,
+      ]
     : [...NAV, TRASH_NAV, SETTINGS_NAV];
 
   return (

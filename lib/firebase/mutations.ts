@@ -18,7 +18,7 @@ import {
 } from "firebase/firestore";
 
 import { getDb } from "./client";
-import type { TaskPriority, TaskStatus, Visibility } from "@/types";
+import type { Role, TaskPriority, TaskStatus, Visibility } from "@/types";
 
 // ---------------------------------------------------------------------------
 // クライアント（admin のみ / §3.2）
@@ -155,4 +155,16 @@ export async function setTaskDeleted(id: string, isDeleted: boolean) {
     ...(isDeleted ? {} : { deletedByProject: deleteField() }),
     updatedAt: serverTimestamp(),
   });
+}
+
+// ---------------------------------------------------------------------------
+// メンバー管理（admin のみ / §3.2）
+// ---------------------------------------------------------------------------
+/**
+ * ユーザーのロールを変更する。
+ * ルール側で「admin のみ実行可・自己昇格不可」を強制している。
+ * 最後の admin を降格させない保護は UI 側（/members）で行う。
+ */
+export async function updateUserRole(uid: string, role: Role) {
+  return updateDoc(doc(getDb(), "users", uid), { role });
 }

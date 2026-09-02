@@ -64,21 +64,47 @@ pnpm test                # 単体テスト + ルールテスト
 
 ---
 
-## デプロイ（概要 / 詳細は Phase 8 で最終化）
+## デプロイ手順（ランブック）
 
 デプロイ先プロジェクトは `.firebaserc` に設定済み（`missions-coorpolate`）。
 
+### 初回のみ
+
 ```bash
-# 初回のみ: Firebase CLI ログインと Web Frameworks 実験機能の有効化
+# 1) Firebase CLI にログインし、Web Frameworks 実験機能を有効化
 pnpm dlx firebase-tools login
 pnpm dlx firebase-tools experiments:enable webframeworks
 
-# ルール・インデックス・Storage ルール
-pnpm dlx firebase-tools deploy --only firestore:rules,firestore:indexes,storage
+# 2) 下記「環境前提: 組織ポリシーと IAM」の手動付与を実施
 
-# アプリ本体（Hosting）と Cloud Functions
-pnpm dlx firebase-tools deploy --only hosting,functions
+# 3) ダイジェストメールを使う場合（任意）
+cp functions/.env.example functions/.env       # GMAIL_SMTP_USER を記入
+pnpm dlx firebase-tools functions:secrets:set GMAIL_SMTP_PASSWORD
+#   Gmail の「アプリ パスワード」を入力（2段階認証を有効化して
+#   https://myaccount.google.com/apppasswords で発行。通常のパスワードは不可）
 ```
+
+### 通常のデプロイ
+
+```bash
+# 全部まとめて
+pnpm dlx firebase-tools deploy
+
+# 変更対象だけ個別に
+pnpm dlx firebase-tools deploy --only firestore:rules       # Firestore ルール
+pnpm dlx firebase-tools deploy --only firestore:indexes     # 複合インデックス
+pnpm dlx firebase-tools deploy --only storage               # Storage ルール
+pnpm dlx firebase-tools deploy --only functions             # Cloud Functions（predeploy で自動ビルド）
+pnpm dlx firebase-tools deploy --only hosting               # アプリ本体（Next.js）
+```
+
+### デプロイ後の動作確認チェックリスト
+
+1. `missions.co.jp` アカウントでログインできる（ドメイン外は弾かれる）
+2. `/settings` → 通知を有効化 → テスト送信が届く
+3. タスクに担当者を割り当てると通知が届く
+4. member ロールのアカウントでプロジェクト一覧が表示できる（複合インデックスの確認）
+5. プロジェクトをゴミ箱に入れると配下タスクも連動する（Functions の確認）
 
 ### ⚠️ 環境前提: 組織ポリシーと IAM（実運用で確認済み）
 
@@ -125,6 +151,8 @@ lib/
   date.ts               日時フォーマット・カレンダー日差分
   utils.ts              cn() ほかユーティリティ
 hooks/useCollections.ts Firestore のリアルタイム購読フック
+public/
+  firebase-messaging-sw.js  FCM バックグラウンド受信用 Service Worker
 types/                  Firestore ドキュメントの型
 tests/
   unit/                 純粋ロジックの単体テスト（エミュレータ不要）
@@ -414,5 +442,31 @@ pnpm dlx firebase-tools deploy --only functions,firestore:indexes
 
 現在のテスト数: **単体 47 / ルール 62**
 
-### ⏳ Phase 8 — 仕上げ（予定）
-（各フェーズ完了時にここへ追記していきます）
+### ✅ Phase 8 — 仕上げ
+
+**メンバー管理（`/members`・Admin 限定）**
+- 全メンバーの一覧（名前・メール・登録日）とロール変更（管理者／PM／メンバー）
+- **最後の管理者は降格不可**（UI で保護。誰も権限管理できなくなる事故を防ぐ）
+- 「自分」「初期管理者」バッジ、ロールごとの権限説明（§3.2）を併記
+- 招待の案内: `missions.co.jp` アカウントでログインすれば自動的にメンバー登録されるため、
+  **招待はアプリの URL を共有するだけ**。必要に応じてこの画面でロールを引き上げる
+- ルール変更（admin のみ・自己昇格不可）は Phase 2 実装のルール + テストで担保済み
+
+**エラーハンドリング・仕上げ**
+- 404 ページ（`app/not-found.tsx`）とエラーバウンダリ（`app/error.tsx`・再試行導線つき）
+- favicon（`app/icon.png`）
+- 各一覧の空状態・ローディング・エラー表示は各フェーズで実装済み
+
+**README 最終化**
+- デプロイ手順をランブック化（初回セットアップ／通常デプロイ／動作確認チェックリスト）
+
+---
+
+## 運用メモ
+
+- **通知が届かないとき**: `/settings` の許可状態バッジとテスト送信で切り分け（§「通知が動かないときの切り分け」参照）
+- **新メンバーの追加**: アプリ URL を共有 → 本人が Google ログイン → 必要なら `/members` でロール変更
+- **ゴミ箱**: 削除から 30 日で完全削除（毎日 4:00 JST のバッチ）。それまでは `/trash` から復元可能
+- **毎朝 9:00 JST**: 期日リマインド（プッシュ）+ デイリーダイジェスト（メール）が自動実行
+- **コスト**: Cloud Functions は最小インスタンス 0・maxInstances 10。Cloud Scheduler 2 ジョブ。
+  Blaze プランの予算アラートを設定済みであること
