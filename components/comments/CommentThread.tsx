@@ -5,6 +5,7 @@ import { MessageSquare, Pencil, Trash2 } from "lucide-react";
 
 import { useAuth } from "@/components/auth/AuthProvider";
 import { Button } from "@/components/ui/button";
+import { LinkifiedText } from "@/components/ui/linkified-text";
 import { Spinner } from "@/components/ui/loader";
 import { Textarea } from "@/components/ui/textarea";
 import { canDeleteOthersComment } from "@/lib/auth/roles";
@@ -155,7 +156,9 @@ function CommentNode({
             />
           </div>
         ) : (
-          <p className="mt-2 whitespace-pre-wrap text-sm">{comment.body}</p>
+          <p className="mt-2 text-sm">
+            <LinkifiedText text={comment.body} />
+          </p>
         )}
 
         {!comment.isDeleted && !editing ? (

@@ -11,6 +11,7 @@ import { TaskDialog } from "@/components/tasks/TaskDialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { LinkifiedText } from "@/components/ui/linkified-text";
 import { Spinner } from "@/components/ui/loader";
 import {
   Select,
@@ -163,7 +164,9 @@ export default function TaskDetailPage() {
         <Card>
           <CardContent className="p-4">
             <p className="mb-2 text-xs text-muted-foreground">詳細</p>
-            <p className="whitespace-pre-wrap text-sm">{task.description}</p>
+            <p className="text-sm">
+              <LinkifiedText text={task.description ?? ""} />
+            </p>
           </CardContent>
         </Card>
       ) : null}
