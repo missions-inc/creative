@@ -18,6 +18,34 @@ import {
 } from "@/lib/firebase/messaging";
 
 /**
+ * 呼び出し可能関数のエラーを、原因の切り分けができる文言に変換する。
+ *
+ * 特に `internal` は「関数に到達できていない」ときにも出るため要注意
+ * （未デプロイ / リージョン不一致 / Cloud Run の invoker 権限不足など）。
+ * この場合は関数側のログにも何も残らない。
+ */
+function describeCallableError(e: unknown): string {
+  const err = e as { code?: string; message?: string };
+  const code = err.code ?? "";
+  const detail = err.message ? `（${err.message}）` : "";
+
+  switch (code) {
+    case "functions/unauthenticated":
+      return "ログイン状態が確認できませんでした。再度ログインしてお試しください。";
+    case "functions/permission-denied":
+      return `権限がありません${detail}`;
+    case "functions/failed-precondition":
+      return `${err.message ?? "先に「この端末で通知を有効にする」を実行してください。"}`;
+    case "functions/not-found":
+      return "通知機能（Cloud Functions）が見つかりません。デプロイが完了しているか、リージョン設定が一致しているかご確認ください。";
+    case "functions/internal":
+      return "通知機能に接続できませんでした。Cloud Functions が未デプロイか、関数の呼び出し権限（Cloud Run invoker）が付与されていない可能性があります。README の「通知が動かないときの切り分け」をご確認ください。";
+    default:
+      return `テスト送信に失敗しました${detail || `（${code || "原因不明"}）`}`;
+  }
+}
+
+/**
  * 通知の設定・疎通確認（仕様書 §6）。
  *
  * Chrome の通知は各ユーザーのローカル設定（OS の通知許可・Chrome の起動状態・
@@ -107,13 +135,7 @@ export function NotificationSettings() {
             },
       );
     } catch (e) {
-      setMessage({
-        kind: "error",
-        text:
-          e instanceof Error
-            ? `テスト送信に失敗しました: ${e.message}`
-            : "テスト送信に失敗しました。",
-      });
+      setMessage({ kind: "error", text: describeCallableError(e) });
     } finally {
       setBusy(false);
     }

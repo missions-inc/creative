@@ -297,5 +297,55 @@ pnpm dlx firebase-tools deploy --only firestore:rules
 > `dailyDueReminder` は Cloud Scheduler を使うため **Blaze プラン**が必要です。
 > 初回デプロイ時に Cloud Scheduler API の有効化を求められる場合があります。
 
+#### 通知が動かないときの切り分け
+
+**症状: テスト送信が `internal` で失敗し、`functions:log` にも何も出ない**
+
+`internal` は「関数が例外を投げた」ときだけでなく、**リクエストが関数に到達していない**ときにも出ます。
+到達していない場合は関数側のログにも何も残らないため、この2つは同じ見え方になります。
+
+主な原因は **Cloud Run の呼び出し権限（invoker）が付与されていない**ことです。
+第2世代の Cloud Functions は Cloud Run 上で動くため、invoker 権限がないと
+リクエストは関数に届く前に 403 で弾かれます。このとき CORS ヘッダも返らないので、
+ブラウザからは原因不明の `internal` として現れます。
+
+対策として `sendTestNotification` には **`invoker: "public"` を明示**しています
+（認可自体は関数内でログイン必須＋ドメイン制限としてチェックしています）。反映するには再デプロイが必要です:
+
+```bash
+pnpm dlx firebase-tools deploy --only functions
+```
+
+それでも直らない場合の確認手順:
+
+```bash
+# 1) 関数が存在するか・リージョンが asia-northeast1 か
+pnpm dlx firebase-tools functions:list
+
+# 2) invoker 権限を手動で付与する
+gcloud run services add-iam-policy-binding sendtestnotification \
+  --region=asia-northeast1 --project=missions-coorpolate \
+  --member=allUsers --role=roles/run.invoker
+
+# 3) 第2世代の関数のログは Cloud Run 側に出るため、
+#    firebase functions:log では拾えないことがある
+gcloud logging read \
+  'resource.type="cloud_run_revision" AND resource.labels.service_name="sendtestnotification"' \
+  --project=missions-coorpolate --limit=20
+```
+
+> 組織ポリシーの **ドメイン制限共有（Domain Restricted Sharing）** が有効だと、
+> `allUsers` への権限付与がブロックされます。その場合は Google Cloud コンソールの
+> 「IAM と管理 > 組織のポリシー」で当該プロジェクトに例外を設定してください。
+
+**その他のエラーと意味**
+
+| クライアントの表示 | 原因 |
+|---|---|
+| 通知機能が見つかりません | 未デプロイ、またはリージョン不一致 |
+| 先に「この端末で通知を有効にする」を実行 | FCM トークンが未登録 |
+| 権限がありません | `missions.co.jp` 以外のアカウント |
+| 通知機能に接続できませんでした | 未デプロイ / invoker 権限不足（上記参照） |
+
 ### ⏳ Phase 7 以降
 （各フェーズ完了時にここへ追記していきます）
