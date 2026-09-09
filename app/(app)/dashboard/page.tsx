@@ -2,12 +2,15 @@
 
 import { Suspense, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { Plus } from "lucide-react";
 
 import { useAuth } from "@/components/auth/AuthProvider";
 import { AssigneeFilter } from "@/components/tasks/AssigneeFilter";
 import { ClientProjectTaskTree } from "@/components/tasks/ClientProjectTaskTree";
 import { GroupedTaskList } from "@/components/tasks/GroupedTaskList";
+import { TaskDialog } from "@/components/tasks/TaskDialog";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/loader";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useClients, useProjects, useTasks, useUsers } from "@/hooks/useCollections";
@@ -61,6 +64,7 @@ function DashboardView() {
 
   // 担当者フィルタはタブを切り替えても保持する（期日間近・クライアント別で共有）。
   const [assigneeFilter, setAssigneeFilter] = useState<string[]>([]);
+  const [creatingTask, setCreatingTask] = useState(false);
 
   const uid = appUser?.uid;
 
@@ -121,6 +125,10 @@ function DashboardView() {
             ようこそ、{appUser?.displayName ?? appUser?.email} さん
           </p>
         </div>
+        <Button onClick={() => setCreatingTask(true)}>
+          <Plus />
+          タスクを追加
+        </Button>
       </div>
 
       {error ? (
@@ -198,6 +206,17 @@ function DashboardView() {
           />
         </TabsContent>
       </Tabs>
+
+      {/* ピッカーモード: プロジェクト選択 + PM以上はインライン新規作成。
+          作成後は onSnapshot 購読により一覧へ即時反映される。 */}
+      <TaskDialog
+        open={creatingTask}
+        onOpenChange={setCreatingTask}
+        title="タスクを追加"
+        projects={projects}
+        clients={clients.filter((c) => !c.isDeleted)}
+        users={users}
+      />
     </div>
   );
 }

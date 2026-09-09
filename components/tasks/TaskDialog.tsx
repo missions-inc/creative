@@ -3,6 +3,7 @@
 import { useState } from "react";
 import type { Timestamp } from "firebase/firestore";
 
+import { useAuth } from "@/components/auth/AuthProvider";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -25,7 +26,13 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { VisibilityEditor } from "@/components/visibility/VisibilityEditor";
 import { validateNarrowing } from "@/lib/access/visibility";
+import { canManageClients, canManageProjects } from "@/lib/auth/roles";
 import { fromDateTimeLocalValue, toDateTimeLocalValue } from "@/lib/date";
+import {
+  createClient,
+  createProject,
+  createTask,
+} from "@/lib/firebase/mutations";
 import {
   ROLE_LABELS,
   TASK_PRIORITIES,
@@ -33,6 +40,7 @@ import {
   TASK_STATUSES,
   TASK_STATUS_LABELS,
   type AppUser,
+  type Client,
   type Project,
   type Task,
   type TaskPriority,
@@ -50,11 +58,32 @@ export interface TaskFormValues {
   visibility: Visibility;
 }
 
+/** プロジェクト選択欄の特別な選択肢。 */
+const NEW_PROJECT = "__new_project__";
+const NEW_CLIENT = "__new_client__";
+
+/**
+ * タスクの作成・編集ダイアログ。2 つのモードがある。
+ *
+ * 1. 固定モード（従来どおり）: `project` を渡す。
+ *    プロジェクト詳細ページからの作成・編集で使用し、保存処理は `onSubmit` に委譲。
+ *
+ * 2. ピッカーモード（ダッシュボード用）: `project` を渡さず
+ *    `projects` と `clients` を渡す。プロジェクトを選択してタスクを作成でき、
+ *    PM 以上には「＋新規プロジェクト」の選択肢を出してその場で
+ *    クライアント（新規入力は admin のみ / §3.2）・プロジェクト名・公開範囲を
+ *    入力して作成できる。保存処理はダイアログ内で行う（作成のみ）。
+ *
+ * どちらのモードでも公開範囲の「狭める方向のみ」（境界ルール2）は
+ * VisibilityEditor + validateNarrowing + Firestore ルールで担保される。
+ */
 export function TaskDialog({
   open,
   onOpenChange,
   title,
   project,
+  projects = [],
+  clients = [],
   users,
   initial,
   onSubmit,
@@ -62,11 +91,23 @@ export function TaskDialog({
   open: boolean;
   onOpenChange: (open: boolean) => void;
   title: string;
-  project: Project;
+  /** 固定モード: 対象プロジェクト。省略時はピッカーモード。 */
+  project?: Project;
+  /** ピッカーモード: 選択可能なプロジェクト（アクセス可能なもののみ渡すこと）。 */
+  projects?: Project[];
+  /** ピッカーモード: クライアント一覧（削除済みは除いて渡すこと）。 */
+  clients?: Client[];
   users: AppUser[];
   initial?: Task;
-  onSubmit: (values: TaskFormValues) => Promise<void>;
+  /** 固定モードの保存処理。ピッカーモードでは使われない。 */
+  onSubmit?: (values: TaskFormValues) => Promise<void>;
 }) {
+  const { appUser } = useAuth();
+  const pickerMode = !project;
+  const canCreateProject = canManageProjects(appUser?.role);
+  const canCreateClient = canManageClients(appUser?.role);
+
+  // --- タスクフィールド ---
   const [taskTitle, setTaskTitle] = useState("");
   const [description, setDescription] = useState("");
   const [assignees, setAssignees] = useState<string[]>([]);
@@ -75,6 +116,15 @@ export function TaskDialog({
   const [priority, setPriority] = useState<TaskPriority>("mid");
   // 既定はプロジェクトの visibility を継承（§3.5）。
   const [visibility, setVisibility] = useState<Visibility>({ mode: "all" });
+
+  // --- ピッカーモード: プロジェクト選択 / インライン新規作成 ---
+  const [selectedProjectId, setSelectedProjectId] = useState("");
+  const [npName, setNpName] = useState("");
+  const [npClientId, setNpClientId] = useState("");
+  const [npClientName, setNpClientName] = useState("");
+  // 新規プロジェクトの公開範囲。既存の作成画面（ProjectDialog）と同じ既定値。
+  const [npVisibility, setNpVisibility] = useState<Visibility>({ mode: "all" });
+
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -88,12 +138,47 @@ export function TaskDialog({
       setDueAtValue(toDateTimeLocalValue(initial?.dueAt));
       setStatus(initial?.status ?? "not_started");
       setPriority(initial?.priority ?? "mid");
-      setVisibility(initial?.visibility ?? project.visibility);
+      setVisibility(initial?.visibility ?? project?.visibility ?? { mode: "all" });
+      setSelectedProjectId("");
+      setNpName("");
+      setNpClientId("");
+      setNpClientName("");
+      setNpVisibility({ mode: "all" });
       setError(null);
     }
   }
 
-  const narrowingError = validateNarrowing(visibility, project.visibility);
+  const creatingNewProject = pickerMode && selectedProjectId === NEW_PROJECT;
+  const selectedProject = pickerMode
+    ? projects.find((p) => p.id === selectedProjectId)
+    : project;
+
+  // タスクの公開範囲の「親」。新規プロジェクトの場合は編集中の公開範囲が親になる。
+  const parentVisibility = creatingNewProject
+    ? npVisibility
+    : selectedProject?.visibility;
+
+  const projectChosen = Boolean(selectedProject) || creatingNewProject;
+  const narrowingError = parentVisibility
+    ? validateNarrowing(visibility, parentVisibility)
+    : null;
+
+  /** プロジェクト選択が変わったら、タスクの公開範囲を親の継承値にリセットする。 */
+  const onSelectProject = (value: string) => {
+    setSelectedProjectId(value);
+    if (value === NEW_PROJECT) {
+      setVisibility(npVisibility);
+    } else {
+      const p = projects.find((x) => x.id === value);
+      if (p) setVisibility(p.visibility);
+    }
+  };
+
+  /** 新規プロジェクトの公開範囲を変えたら、タスク側も継承し直す（親より広がるのを防ぐ）。 */
+  const onChangeNpVisibility = (v: Visibility) => {
+    setNpVisibility(v);
+    setVisibility(v);
+  };
 
   const toggleAssignee = (uid: string, checked: boolean) => {
     setAssignees((prev) =>
@@ -102,13 +187,21 @@ export function TaskDialog({
   };
 
   const submit = async () => {
+    if (pickerMode && !projectChosen)
+      return setError("プロジェクトを選択してください。");
+    if (creatingNewProject) {
+      if (!npClientId) return setError("クライアントを選択してください。");
+      if (npClientId === NEW_CLIENT && !npClientName.trim())
+        return setError("クライアント名を入力してください。");
+      if (!npName.trim()) return setError("プロジェクト名を入力してください。");
+    }
     if (!taskTitle.trim()) return setError("タイトルを入力してください。");
     if (narrowingError) return setError(narrowingError);
 
     setSubmitting(true);
     setError(null);
     try {
-      await onSubmit({
+      const values: TaskFormValues = {
         title: taskTitle,
         description,
         assignees,
@@ -116,7 +209,35 @@ export function TaskDialog({
         status,
         priority,
         visibility,
-      });
+      };
+
+      if (!pickerMode) {
+        // 固定モード: 保存処理は呼び出し元（作成 or 更新）に委譲。
+        await onSubmit?.(values);
+      } else {
+        if (!appUser) throw new Error("ログイン情報を確認できませんでした。");
+        let projectId: string;
+        let clientId: string;
+
+        if (creatingNewProject) {
+          // クライアントの新規作成は admin のみ（§3.2 / ルールでも強制）。
+          clientId =
+            npClientId === NEW_CLIENT
+              ? (await createClient({ name: npClientName })).id
+              : npClientId;
+          const projectRef = await createProject({
+            clientId,
+            name: npName,
+            visibility: npVisibility,
+          });
+          projectId = projectRef.id;
+        } else {
+          projectId = selectedProject!.id;
+          clientId = selectedProject!.clientId;
+        }
+
+        await createTask({ projectId, clientId, ...values }, appUser.uid);
+      }
       onOpenChange(false);
     } catch (e) {
       setError(
@@ -137,6 +258,92 @@ export function TaskDialog({
         </DialogHeader>
 
         <div className="space-y-4">
+          {pickerMode ? (
+            <div className="space-y-3 rounded-md border bg-muted/30 p-3">
+              <div className="space-y-1.5">
+                <Label>プロジェクト</Label>
+                <Select value={selectedProjectId} onValueChange={onSelectProject}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="選択してください" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {projects.map((p) => (
+                      <SelectItem key={p.id} value={p.id}>
+                        {p.name}
+                      </SelectItem>
+                    ))}
+                    {/* プロジェクト作成は PM 以上のみ（§3.2）。権限がなければ出さない */}
+                    {canCreateProject ? (
+                      <SelectItem value={NEW_PROJECT}>
+                        ＋ 新規プロジェクトを作成...
+                      </SelectItem>
+                    ) : null}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {creatingNewProject ? (
+                <div className="space-y-3 border-t pt-3">
+                  <div className="space-y-1.5">
+                    <Label>クライアント</Label>
+                    <Select value={npClientId} onValueChange={setNpClientId}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="選択してください" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {clients.map((c) => (
+                          <SelectItem key={c.id} value={c.id}>
+                            {c.name}
+                          </SelectItem>
+                        ))}
+                        {/* クライアント登録は admin のみ（§3.2） */}
+                        {canCreateClient ? (
+                          <SelectItem value={NEW_CLIENT}>
+                            ＋ 新規クライアントを登録...
+                          </SelectItem>
+                        ) : null}
+                      </SelectContent>
+                    </Select>
+                    {!canCreateClient ? (
+                      <p className="text-xs text-muted-foreground">
+                        クライアントの新規登録は管理者のみ行えます。
+                      </p>
+                    ) : null}
+                  </div>
+
+                  {npClientId === NEW_CLIENT ? (
+                    <div className="space-y-1.5">
+                      <Label htmlFor="np-client-name">新規クライアント名</Label>
+                      <Input
+                        id="np-client-name"
+                        value={npClientName}
+                        onChange={(e) => setNpClientName(e.target.value)}
+                        placeholder="株式会社〇〇"
+                      />
+                    </div>
+                  ) : null}
+
+                  <div className="space-y-1.5">
+                    <Label htmlFor="np-name">プロジェクト名</Label>
+                    <Input
+                      id="np-name"
+                      value={npName}
+                      onChange={(e) => setNpName(e.target.value)}
+                      placeholder="サイトリニューアル"
+                    />
+                  </div>
+
+                  {/* 新規プロジェクトの公開範囲（既定は「全メンバー」= 既存の作成画面と同じ） */}
+                  <VisibilityEditor
+                    value={npVisibility}
+                    onChange={onChangeNpVisibility}
+                    users={users}
+                  />
+                </div>
+              ) : null}
+            </div>
+          ) : null}
+
           <div className="space-y-1.5">
             <Label htmlFor="task-title">タイトル</Label>
             <Input
@@ -230,12 +437,18 @@ export function TaskDialog({
           </div>
 
           {/* 親（プロジェクト）の範囲内でのみ設定可（境界ルール2） */}
-          <VisibilityEditor
-            value={visibility}
-            onChange={setVisibility}
-            parent={project.visibility}
-            users={users}
-          />
+          {parentVisibility ? (
+            <VisibilityEditor
+              value={visibility}
+              onChange={setVisibility}
+              parent={parentVisibility}
+              users={users}
+            />
+          ) : (
+            <p className="text-xs text-muted-foreground">
+              公開範囲はプロジェクトを選択すると設定できます（プロジェクトの範囲を継承します）。
+            </p>
+          )}
 
           {error ? (
             <p role="alert" className="text-sm text-destructive">
@@ -250,7 +463,11 @@ export function TaskDialog({
           </Button>
           <Button
             onClick={submit}
-            disabled={submitting || narrowingError !== null}
+            disabled={
+              submitting ||
+              narrowingError !== null ||
+              (pickerMode && !projectChosen)
+            }
           >
             {submitting ? <Spinner /> : null}
             保存
