@@ -12,6 +12,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { daysUntil, formatDateTime } from "@/lib/date";
+import {
+  DUE_BORDER_CLASSES,
+  DUE_TEXT_CLASSES,
+  STATUS_BADGE_CLASSES,
+  dueUrgency,
+} from "@/lib/tasks/colors";
 import { updateTaskStatus } from "@/lib/firebase/mutations";
 import { cn } from "@/lib/utils";
 import {
@@ -23,16 +29,6 @@ import {
   type Task,
   type TaskStatus,
 } from "@/types";
-
-/** 期日の緊急度に応じた色分け（超過は赤、2日以内は橙 / §3.9）。 */
-function dueClassName(task: Task): string | undefined {
-  if (task.status === "done") return undefined;
-  const d = daysUntil(task.dueAt);
-  if (d === null) return undefined;
-  if (d < 0) return "text-destructive font-medium";
-  if (d <= 2) return "text-amber-700 font-medium";
-  return undefined;
-}
 
 /** 期日までの残り日数を人間向けに表す。 */
 function dueRelativeLabel(task: Task): string | null {
@@ -75,8 +71,16 @@ export function TaskList({
     <div className="space-y-2">
       {tasks.map((task) => {
         const relative = dueRelativeLabel(task);
+        const urgency = dueUrgency(task);
         return (
-          <Card key={task.id} className={task.isDeleted ? "opacity-60" : undefined}>
+          <Card
+            key={task.id}
+            className={cn(
+              // 枠線 = 期日の緊急度（超過=赤 / 2日以内=黄）。ステータス色は使わない。
+              DUE_BORDER_CLASSES[urgency],
+              task.isDeleted && "opacity-60",
+            )}
+          >
             <CardContent className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
               <div className="min-w-0 flex-1">
                 {showBreadcrumb ? (
@@ -99,8 +103,12 @@ export function TaskList({
                   >
                     {task.title}
                   </Link>
-                  <Badge variant={task.priority}>
-                    {TASK_PRIORITY_LABELS[task.priority]}
+                  {/* バッジ = ステータス（アプリ全体で統一の色 + テキスト併記） */}
+                  <Badge className={STATUS_BADGE_CLASSES[task.status]}>
+                    {TASK_STATUS_LABELS[task.status]}
+                  </Badge>
+                  <Badge variant="outline">
+                    優先度: {TASK_PRIORITY_LABELS[task.priority]}
                   </Badge>
                   {task.isDeleted ? (
                     <Badge variant="secondary">削除済み</Badge>
@@ -108,7 +116,7 @@ export function TaskList({
                 </div>
 
                 <div className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
-                  <span className={cn(dueClassName(task))}>
+                  <span className={cn(DUE_TEXT_CLASSES[urgency])}>
                     期日: {formatDateTime(task.dueAt)}
                     {relative ? `（${relative}）` : ""}
                   </span>

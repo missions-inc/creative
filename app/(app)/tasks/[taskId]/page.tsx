@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/select";
 import { useClients, useProjects, useTasks, useUsers } from "@/hooks/useCollections";
 import { formatDateTime } from "@/lib/date";
+import { STATUS_BADGE_CLASSES } from "@/lib/tasks/colors";
 import { setTaskDeleted, updateTask, updateTaskStatus } from "@/lib/firebase/mutations";
 import {
   TASK_PRIORITY_LABELS,
@@ -91,8 +92,12 @@ export default function TaskDetailPage() {
               {clientName ?? "—"}
               {project ? ` ／ ${project.name}` : ""}
             </p>
-            <h1 className="flex items-center gap-2 text-2xl font-bold">
+            <h1 className="flex flex-wrap items-center gap-2 text-2xl font-bold">
               {task.title}
+              {/* バッジ = ステータス（lib/tasks/colors.ts の統一色） */}
+              <Badge className={STATUS_BADGE_CLASSES[task.status]}>
+                {TASK_STATUS_LABELS[task.status]}
+              </Badge>
               {task.isDeleted ? <Badge variant="secondary">削除済み</Badge> : null}
             </h1>
           </div>
@@ -137,9 +142,7 @@ export default function TaskDetailPage() {
           </div>
 
           <Field label="優先度">
-            <Badge variant={task.priority}>
-              {TASK_PRIORITY_LABELS[task.priority]}
-            </Badge>
+            <Badge variant="outline">{TASK_PRIORITY_LABELS[task.priority]}</Badge>
           </Field>
 
           <Field label="期日">{formatDateTime(task.dueAt)}</Field>
