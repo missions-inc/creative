@@ -83,8 +83,13 @@ export default function ProjectsPage() {
       ) : (
         <div className="space-y-6">
           {grouped.map(([clientId, list]) => (
-            <section key={clientId} className="space-y-2">
-              <h2 className="text-sm font-semibold text-muted-foreground">
+            <section key={clientId} className="space-y-3">
+              {/* クライアント > プロジェクトの階層が一目で分かるよう、見出しを大きく + 緑マーカー */}
+              <h2 className="flex items-center gap-2.5 border-b pb-2 text-xl font-bold">
+                <span
+                  aria-hidden
+                  className="h-3 w-3 shrink-0 rounded-full bg-green-500"
+                />
                 {clientNameById.get(clientId) ?? "（不明なクライアント）"}
               </h2>
               <div className="space-y-2">

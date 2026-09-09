@@ -85,8 +85,13 @@ export function ClientProjectTaskTree({
 
         return (
           <section key={clientId} className="space-y-4">
-            <div className="flex items-center gap-2 border-b pb-2">
-              <h2 className="text-lg font-semibold">
+            <div className="flex items-center gap-2.5 border-b pb-2">
+              {/* /projects と同じ階層表現（大きめ見出し + 緑マーカー） */}
+              <span
+                aria-hidden
+                className="h-3 w-3 shrink-0 rounded-full bg-green-500"
+              />
+              <h2 className="text-xl font-bold">
                 {client?.name ?? "（不明なクライアント）"}
               </h2>
               <Badge variant="secondary">{total}件</Badge>

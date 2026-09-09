@@ -3,7 +3,15 @@
 import { useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Pencil, Plus, RotateCcw, Trash2 } from "lucide-react";
+import {
+  ArrowLeft,
+  CheckCircle2,
+  ChevronRight,
+  Pencil,
+  Plus,
+  RotateCcw,
+  Trash2,
+} from "lucide-react";
 
 import { useAuth } from "@/components/auth/AuthProvider";
 import { ProjectDialog } from "@/components/projects/ProjectDialog";
@@ -19,6 +27,7 @@ import {
   useUsers,
 } from "@/hooks/useCollections";
 import { canManageProjects } from "@/lib/auth/roles";
+import { cn } from "@/lib/utils";
 import {
   createTask,
   setProjectDeleted,
@@ -38,6 +47,7 @@ export default function ProjectDetailPage() {
 
   const [editing, setEditing] = useState(false);
   const [creatingTask, setCreatingTask] = useState(false);
+  const [showDone, setShowDone] = useState(false);
 
   const project = projects.find((p) => p.id === projectId);
   const canManage = canManageProjects(appUser?.role);
@@ -121,20 +131,55 @@ export default function ProjectDetailPage() {
       </div>
 
       <section className="space-y-3">
-        <h2 className="text-sm font-semibold text-muted-foreground">
-          タスク（{tasks.length}）
-        </h2>
-        {tasksLoading ? (
-          <div className="flex justify-center py-8">
-            <Spinner />
-          </div>
-        ) : (
-          <TaskList
-            tasks={tasks}
-            users={users}
-            emptyLabel="このプロジェクトにはまだタスクがありません。"
-          />
-        )}
+        {(() => {
+          // ダッシュボードでは完了を出さないため、完了タスクはこのページでのみ確認できる。
+          // 見やすさのため未完了を上に、完了は下部の折りたたみにまとめる（既定は閉）。
+          const activeTasks = tasks.filter((t) => t.status !== "done");
+          const doneTasks = tasks.filter((t) => t.status === "done");
+          return (
+            <>
+              <h2 className="text-sm font-semibold text-muted-foreground">
+                タスク（{activeTasks.length}）
+              </h2>
+              {tasksLoading ? (
+                <div className="flex justify-center py-8">
+                  <Spinner />
+                </div>
+              ) : (
+                <>
+                  <TaskList
+                    tasks={activeTasks}
+                    users={users}
+                    emptyLabel="未完了のタスクはありません。"
+                  />
+
+                  {doneTasks.length > 0 ? (
+                    <div className="space-y-3 pt-2">
+                      <button
+                        type="button"
+                        onClick={() => setShowDone((v) => !v)}
+                        aria-expanded={showDone}
+                        className="flex items-center gap-1.5 text-sm font-semibold text-muted-foreground transition-colors hover:text-foreground"
+                      >
+                        <ChevronRight
+                          className={cn(
+                            "h-4 w-4 transition-transform",
+                            showDone && "rotate-90",
+                          )}
+                        />
+                        <CheckCircle2 className="h-4 w-4" />
+                        完了したタスク（{doneTasks.length}）
+                      </button>
+                      {showDone ? (
+                        <TaskList tasks={doneTasks} users={users} />
+                      ) : null}
+                    </div>
+                  ) : null}
+                </>
+              )}
+            </>
+          );
+        })()}
       </section>
 
       <ProjectDialog
