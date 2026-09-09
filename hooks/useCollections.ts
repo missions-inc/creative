@@ -26,6 +26,7 @@ import {
   accessibleTaskQueries,
   subscribeMerged,
 } from "@/lib/firebase/queries";
+import { byDueThenPriority } from "@/lib/tasks/filters";
 import type { AppUser, Attachment, Client, Comment, Project, Task } from "@/types";
 
 interface CollectionState<T> {
@@ -149,13 +150,8 @@ export function useTasks(options?: {
       state.data
         .filter((t) => includeDeleted || !t.isDeleted)
         .filter((t) => !projectId || t.projectId === projectId)
-        .sort((a, b) => {
-          // 期日あり → 期日昇順、期日なしは末尾。
-          const av = a.dueAt?.toMillis() ?? Number.MAX_SAFE_INTEGER;
-          const bv = b.dueAt?.toMillis() ?? Number.MAX_SAFE_INTEGER;
-          if (av !== bv) return av - bv;
-          return a.title.localeCompare(b.title);
-        }),
+        // 統一並び順（期日昇順 → 優先度 高→中→低）。定義は filters.ts に集約。
+        .sort(byDueThenPriority),
     [state.data, projectId, includeDeleted],
   );
 

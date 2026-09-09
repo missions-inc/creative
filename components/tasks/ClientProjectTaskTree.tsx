@@ -5,7 +5,7 @@ import { ChevronRight } from "lucide-react";
 
 import { TaskList } from "@/components/tasks/TaskList";
 import { Badge } from "@/components/ui/badge";
-import { byDueThenTitle } from "@/lib/tasks/filters";
+import { byDueThenPriority } from "@/lib/tasks/filters";
 import { describeVisibility, type AppUser, type Client, type Project, type Task } from "@/types";
 
 /**
@@ -75,7 +75,7 @@ export function ClientProjectTaskTree({
         const clientProjects = (projectsByClient.get(clientId) ?? []).sort((a, b) =>
           a.name.localeCompare(b.name),
         );
-        const orphans = (orphanTasksByClient.get(clientId) ?? []).sort(byDueThenTitle);
+        const orphans = (orphanTasksByClient.get(clientId) ?? []).sort(byDueThenPriority);
         const total =
           orphans.length +
           clientProjects.reduce(
@@ -102,7 +102,7 @@ export function ClientProjectTaskTree({
 
             {clientProjects.map((project) => {
               const projectTasks = (tasksByProject.get(project.id) ?? []).sort(
-                byDueThenTitle,
+                byDueThenPriority,
               );
               return (
                 <div key={project.id} className="space-y-2 pl-1">

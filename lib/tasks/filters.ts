@@ -12,7 +12,7 @@
  * =============================================================================
  */
 import { daysUntil } from "@/lib/date";
-import type { Task } from "@/types";
+import type { Task, TaskPriority } from "@/types";
 
 /** 「2日前〜当日」の 2。リマインド通知（Phase 6）でも同じ値を使う。 */
 export const DUE_SOON_WINDOW_DAYS = 2;
@@ -61,10 +61,22 @@ export function isAssignedTo(task: Task, uid: string): boolean {
   return task.assignees.includes(uid);
 }
 
-/** 期日昇順（期日なしは末尾）→ 同着はタイトル順。 */
-export function byDueThenTitle(a: Task, b: Task): number {
+/** 優先度の並び順（小さいほど先）。 */
+const PRIORITY_ORDER: Record<TaskPriority, number> = { high: 0, mid: 1, low: 2 };
+
+/**
+ * タスク一覧の統一並び順（全画面共通の唯一の定義）:
+ *   第1キー: 期日の昇順（近い順）。期日なしは末尾。
+ *   第2キー: 優先度 高 → 中 → 低。
+ *   第3キー: タイトル順（表示を安定させるため）。
+ * ダッシュボードのセクション分け（超過 / 2日以内 / それ以外）の中でもこの順で並べる。
+ */
+export function byDueThenPriority(a: Task, b: Task): number {
   const av = a.dueAt?.toMillis() ?? Number.MAX_SAFE_INTEGER;
   const bv = b.dueAt?.toMillis() ?? Number.MAX_SAFE_INTEGER;
   if (av !== bv) return av - bv;
+  const ap = PRIORITY_ORDER[a.priority];
+  const bp = PRIORITY_ORDER[b.priority];
+  if (ap !== bp) return ap - bp;
   return a.title.localeCompare(b.title);
 }

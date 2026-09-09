@@ -4,7 +4,7 @@ import { AlertTriangle } from "lucide-react";
 
 import { TaskList } from "@/components/tasks/TaskList";
 import { DUE_HEADING_CLASSES } from "@/lib/tasks/colors";
-import { byDueThenTitle, isDueSoon, isOverdue } from "@/lib/tasks/filters";
+import { byDueThenPriority, isDueSoon, isOverdue } from "@/lib/tasks/filters";
 import { cn } from "@/lib/utils";
 import type { AppUser, Task } from "@/types";
 
@@ -32,12 +32,12 @@ export function GroupedTaskList({
   emptyLabel?: string;
 }) {
   const now = new Date();
-  const overdue = tasks.filter((t) => isOverdue(t, now)).sort(byDueThenTitle);
-  const dueSoon = tasks.filter((t) => isDueSoon(t, now)).sort(byDueThenTitle);
+  const overdue = tasks.filter((t) => isOverdue(t, now)).sort(byDueThenPriority);
+  const dueSoon = tasks.filter((t) => isDueSoon(t, now)).sort(byDueThenPriority);
   const others = includeOthers
     ? tasks
         .filter((t) => !isOverdue(t, now) && !isDueSoon(t, now))
-        .sort(byDueThenTitle)
+        .sort(byDueThenPriority)
     : [];
 
   if (overdue.length + dueSoon.length + others.length === 0) {

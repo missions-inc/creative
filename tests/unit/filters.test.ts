@@ -3,6 +3,7 @@ import { Timestamp } from "firebase/firestore";
 
 import {
   DUE_SOON_WINDOW_DAYS,
+  byDueThenPriority,
   isAssignedTo,
   isDueSoon,
   isIncomplete,
@@ -84,5 +85,55 @@ describe("マイタスク", () => {
   it("assignees に含まれていれば true", () => {
     expect(isAssignedTo(task({ assignees: ["me", "other"] }), "me")).toBe(true);
     expect(isAssignedTo(task({ assignees: ["other"] }), "me")).toBe(false);
+  });
+});
+
+describe("統一並び順 byDueThenPriority（期日昇順 → 優先度 高→中→低）", () => {
+  it("第1キーは期日の昇順（優先度より優先される）", () => {
+    const early = task({ id: "a", dueAt: due(2026, 9, 1), priority: "low" });
+    const late = task({ id: "b", dueAt: due(2026, 9, 5), priority: "high" });
+    expect([late, early].sort(byDueThenPriority).map((t) => t.id)).toEqual([
+      "a",
+      "b",
+    ]);
+  });
+
+  it("期日なしは末尾（期日ありが優先度によらず先）", () => {
+    const noDue = task({ id: "a", dueAt: null, priority: "high" });
+    const withDue = task({ id: "b", dueAt: due(2026, 12, 31), priority: "low" });
+    expect([noDue, withDue].sort(byDueThenPriority).map((t) => t.id)).toEqual([
+      "b",
+      "a",
+    ]);
+  });
+
+  it("期日が同じなら優先度 高→中→低", () => {
+    const d = due(2026, 9, 3);
+    const mid = task({ id: "m", dueAt: d, priority: "mid" });
+    const high = task({ id: "h", dueAt: d, priority: "high" });
+    const low = task({ id: "l", dueAt: d, priority: "low" });
+    expect([mid, low, high].sort(byDueThenPriority).map((t) => t.id)).toEqual([
+      "h",
+      "m",
+      "l",
+    ]);
+  });
+
+  it("期日なし同士も優先度 高→中→低", () => {
+    const mid = task({ id: "m", dueAt: null, priority: "mid" });
+    const high = task({ id: "h", dueAt: null, priority: "high" });
+    const low = task({ id: "l", dueAt: null, priority: "low" });
+    expect([low, mid, high].sort(byDueThenPriority).map((t) => t.id)).toEqual([
+      "h",
+      "m",
+      "l",
+    ]);
+  });
+
+  it("期日・優先度とも同じならタイトル順（表示の安定用）", () => {
+    const d = due(2026, 9, 3);
+    const b = task({ id: "b", title: "b", dueAt: d });
+    const a = task({ id: "a", title: "a", dueAt: d });
+    expect([b, a].sort(byDueThenPriority).map((t) => t.id)).toEqual(["a", "b"]);
   });
 });
