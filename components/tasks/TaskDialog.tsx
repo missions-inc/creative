@@ -69,10 +69,12 @@ const NEW_CLIENT = "__new_client__";
  *    プロジェクト詳細ページからの作成・編集で使用し、保存処理は `onSubmit` に委譲。
  *
  * 2. ピッカーモード（ダッシュボード用）: `project` を渡さず
- *    `projects` と `clients` を渡す。プロジェクトを選択してタスクを作成でき、
- *    PM 以上には「＋新規プロジェクト」の選択肢を出してその場で
- *    クライアント（新規入力は admin のみ / §3.2）・プロジェクト名・公開範囲を
- *    入力して作成できる。保存処理はダイアログ内で行う（作成のみ）。
+ *    `projects` と `clients` を渡す。クライアント → プロジェクトの順に選択して
+ *    タスクを作成できる（プロジェクトは選択クライアントのものだけに絞り込み、
+ *    クライアントを変えると選択済みプロジェクトはリセット）。
+ *    PM 以上には「＋新規プロジェクト」、admin には「＋新規クライアント」の
+ *    選択肢を出してその場で作成できる（§3.2 / ルールでも強制）。
+ *    保存処理はダイアログ内で行う（作成のみ）。
  *
  * どちらのモードでも公開範囲の「狭める方向のみ」（境界ルール2）は
  * VisibilityEditor + validateNarrowing + Firestore ルールで担保される。
@@ -117,10 +119,10 @@ export function TaskDialog({
   // 既定はプロジェクトの visibility を継承（§3.5）。
   const [visibility, setVisibility] = useState<Visibility>({ mode: "all" });
 
-  // --- ピッカーモード: プロジェクト選択 / インライン新規作成 ---
+  // --- ピッカーモード: クライアント → プロジェクトの連動選択 / インライン新規作成 ---
+  const [selectedClientId, setSelectedClientId] = useState("");
   const [selectedProjectId, setSelectedProjectId] = useState("");
   const [npName, setNpName] = useState("");
-  const [npClientId, setNpClientId] = useState("");
   const [npClientName, setNpClientName] = useState("");
   // 新規プロジェクトの公開範囲。既存の作成画面（ProjectDialog）と同じ既定値。
   const [npVisibility, setNpVisibility] = useState<Visibility>({ mode: "all" });
@@ -139,19 +141,33 @@ export function TaskDialog({
       setStatus(initial?.status ?? "not_started");
       setPriority(initial?.priority ?? "mid");
       setVisibility(initial?.visibility ?? project?.visibility ?? { mode: "all" });
+      setSelectedClientId("");
       setSelectedProjectId("");
       setNpName("");
-      setNpClientId("");
       setNpClientName("");
       setNpVisibility({ mode: "all" });
       setError(null);
     }
   }
 
+  const creatingNewClient = pickerMode && selectedClientId === NEW_CLIENT;
   const creatingNewProject = pickerMode && selectedProjectId === NEW_PROJECT;
   const selectedProject = pickerMode
     ? projects.find((p) => p.id === selectedProjectId)
     : project;
+
+  // 選択肢に出すクライアント（アクセス可能なもののみ）:
+  //   - クライアント自体は全メンバーが読めるが、プロジェクトを作れないメンバーには
+  //     「アクセスできるプロジェクトを持つクライアント」だけを出す（選んでも空になるため）。
+  //   - PM 以上は新規プロジェクトの作成先として全クライアントを選べる。
+  const selectableClients = (() => {
+    if (canCreateProject) return clients;
+    const ids = new Set(projects.map((p) => p.clientId));
+    return clients.filter((c) => ids.has(c.id));
+  })();
+
+  // プロジェクトの選択肢は選択中クライアントのものだけ（連動絞り込み）。
+  const clientProjects = projects.filter((p) => p.clientId === selectedClientId);
 
   // タスクの公開範囲の「親」。新規プロジェクトの場合は編集中の公開範囲が親になる。
   const parentVisibility = creatingNewProject
@@ -162,6 +178,21 @@ export function TaskDialog({
   const narrowingError = parentVisibility
     ? validateNarrowing(visibility, parentVisibility)
     : null;
+
+  /**
+   * クライアント選択が変わったら、選択済みプロジェクトをリセットする。
+   * 「＋新規クライアント」の場合は既存プロジェクトが存在しないので
+   * 自動的に「＋新規プロジェクト」を選択状態にする。
+   */
+  const onSelectClient = (value: string) => {
+    setSelectedClientId(value);
+    if (value === NEW_CLIENT) {
+      setSelectedProjectId(NEW_PROJECT);
+      setVisibility(npVisibility);
+    } else {
+      setSelectedProjectId("");
+    }
+  };
 
   /** プロジェクト選択が変わったら、タスクの公開範囲を親の継承値にリセットする。 */
   const onSelectProject = (value: string) => {
@@ -187,14 +218,14 @@ export function TaskDialog({
   };
 
   const submit = async () => {
+    if (pickerMode && !selectedClientId)
+      return setError("クライアントを選択してください。");
     if (pickerMode && !projectChosen)
       return setError("プロジェクトを選択してください。");
-    if (creatingNewProject) {
-      if (!npClientId) return setError("クライアントを選択してください。");
-      if (npClientId === NEW_CLIENT && !npClientName.trim())
-        return setError("クライアント名を入力してください。");
-      if (!npName.trim()) return setError("プロジェクト名を入力してください。");
-    }
+    if (creatingNewClient && !npClientName.trim())
+      return setError("クライアント名を入力してください。");
+    if (creatingNewProject && !npName.trim())
+      return setError("プロジェクト名を入力してください。");
     if (!taskTitle.trim()) return setError("タイトルを入力してください。");
     if (narrowingError) return setError(narrowingError);
 
@@ -221,10 +252,9 @@ export function TaskDialog({
 
         if (creatingNewProject) {
           // クライアントの新規作成は admin のみ（§3.2 / ルールでも強制）。
-          clientId =
-            npClientId === NEW_CLIENT
-              ? (await createClient({ name: npClientName })).id
-              : npClientId;
+          clientId = creatingNewClient
+            ? (await createClient({ name: npClientName })).id
+            : selectedClientId;
           const projectRef = await createProject({
             clientId,
             name: npName,
@@ -260,14 +290,64 @@ export function TaskDialog({
         <div className="space-y-4">
           {pickerMode ? (
             <div className="space-y-3 rounded-md border bg-muted/30 p-3">
+              {/* クライアント → プロジェクトの順で選択（連動絞り込み） */}
               <div className="space-y-1.5">
-                <Label>プロジェクト</Label>
-                <Select value={selectedProjectId} onValueChange={onSelectProject}>
+                <Label>クライアント</Label>
+                <Select value={selectedClientId} onValueChange={onSelectClient}>
                   <SelectTrigger>
                     <SelectValue placeholder="選択してください" />
                   </SelectTrigger>
                   <SelectContent>
-                    {projects.map((p) => (
+                    {selectableClients.map((c) => (
+                      <SelectItem key={c.id} value={c.id}>
+                        {c.name}
+                      </SelectItem>
+                    ))}
+                    {/* クライアント登録は admin のみ（§3.2）。権限がなければ出さない */}
+                    {canCreateClient ? (
+                      <SelectItem value={NEW_CLIENT}>
+                        ＋ 新規クライアントを登録...
+                      </SelectItem>
+                    ) : null}
+                  </SelectContent>
+                </Select>
+                {canCreateProject && !canCreateClient ? (
+                  <p className="text-xs text-muted-foreground">
+                    クライアントの新規登録は管理者のみ行えます。
+                  </p>
+                ) : null}
+              </div>
+
+              {creatingNewClient ? (
+                <div className="space-y-1.5">
+                  <Label htmlFor="np-client-name">新規クライアント名</Label>
+                  <Input
+                    id="np-client-name"
+                    value={npClientName}
+                    onChange={(e) => setNpClientName(e.target.value)}
+                    placeholder="株式会社〇〇"
+                  />
+                </div>
+              ) : null}
+
+              <div className="space-y-1.5">
+                <Label>プロジェクト</Label>
+                <Select
+                  value={selectedProjectId}
+                  onValueChange={onSelectProject}
+                  disabled={!selectedClientId}
+                >
+                  <SelectTrigger>
+                    <SelectValue
+                      placeholder={
+                        selectedClientId
+                          ? "選択してください"
+                          : "先にクライアントを選択してください"
+                      }
+                    />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {clientProjects.map((p) => (
                       <SelectItem key={p.id} value={p.id}>
                         {p.name}
                       </SelectItem>
@@ -280,49 +360,18 @@ export function TaskDialog({
                     ) : null}
                   </SelectContent>
                 </Select>
+                {selectedClientId &&
+                !creatingNewClient &&
+                clientProjects.length === 0 &&
+                !canCreateProject ? (
+                  <p className="text-xs text-muted-foreground">
+                    このクライアントに選択できるプロジェクトがありません。
+                  </p>
+                ) : null}
               </div>
 
               {creatingNewProject ? (
                 <div className="space-y-3 border-t pt-3">
-                  <div className="space-y-1.5">
-                    <Label>クライアント</Label>
-                    <Select value={npClientId} onValueChange={setNpClientId}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="選択してください" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {clients.map((c) => (
-                          <SelectItem key={c.id} value={c.id}>
-                            {c.name}
-                          </SelectItem>
-                        ))}
-                        {/* クライアント登録は admin のみ（§3.2） */}
-                        {canCreateClient ? (
-                          <SelectItem value={NEW_CLIENT}>
-                            ＋ 新規クライアントを登録...
-                          </SelectItem>
-                        ) : null}
-                      </SelectContent>
-                    </Select>
-                    {!canCreateClient ? (
-                      <p className="text-xs text-muted-foreground">
-                        クライアントの新規登録は管理者のみ行えます。
-                      </p>
-                    ) : null}
-                  </div>
-
-                  {npClientId === NEW_CLIENT ? (
-                    <div className="space-y-1.5">
-                      <Label htmlFor="np-client-name">新規クライアント名</Label>
-                      <Input
-                        id="np-client-name"
-                        value={npClientName}
-                        onChange={(e) => setNpClientName(e.target.value)}
-                        placeholder="株式会社〇〇"
-                      />
-                    </div>
-                  ) : null}
-
                   <div className="space-y-1.5">
                     <Label htmlFor="np-name">プロジェクト名</Label>
                     <Input
