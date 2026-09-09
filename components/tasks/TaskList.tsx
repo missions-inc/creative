@@ -15,7 +15,9 @@ import { daysUntil, formatDateTime } from "@/lib/date";
 import {
   DUE_BORDER_CLASSES,
   DUE_TEXT_CLASSES,
-  STATUS_BADGE_CLASSES,
+  PRIORITY_BADGE_CLASSES,
+  STATUS_SELECT_ITEM_CLASSES,
+  STATUS_SELECT_TRIGGER_CLASSES,
   dueUrgency,
 } from "@/lib/tasks/colors";
 import { updateTaskStatus } from "@/lib/firebase/mutations";
@@ -103,12 +105,9 @@ export function TaskList({
                   >
                     {task.title}
                   </Link>
-                  {/* バッジ = ステータス（アプリ全体で統一の色 + テキスト併記） */}
-                  <Badge className={STATUS_BADGE_CLASSES[task.status]}>
-                    {TASK_STATUS_LABELS[task.status]}
-                  </Badge>
-                  <Badge variant="outline">
-                    優先度: {TASK_PRIORITY_LABELS[task.priority]}
+                  {/* バッジ = 優先度（ステータスの色は右の Select が担う） */}
+                  <Badge className={PRIORITY_BADGE_CLASSES[task.priority]}>
+                    {TASK_PRIORITY_LABELS[task.priority]}
                   </Badge>
                   {task.isDeleted ? (
                     <Badge variant="secondary">削除済み</Badge>
@@ -139,12 +138,19 @@ export function TaskList({
                   value={task.status}
                   onValueChange={(v) => updateTaskStatus(task.id, v as TaskStatus)}
                 >
-                  <SelectTrigger>
+                  {/* Select 自体をステータス色で塗る（変更は onSnapshot 経由で即反映） */}
+                  <SelectTrigger
+                    className={STATUS_SELECT_TRIGGER_CLASSES[task.status]}
+                  >
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
                     {TASK_STATUSES.map((s) => (
-                      <SelectItem key={s} value={s}>
+                      <SelectItem
+                        key={s}
+                        value={s}
+                        className={STATUS_SELECT_ITEM_CLASSES[s]}
+                      >
                         {TASK_STATUS_LABELS[s]}
                       </SelectItem>
                     ))}

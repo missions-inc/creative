@@ -3,9 +3,10 @@
  * タスクの色分けルール（アプリ全体で共有する唯一の定義）
  * -----------------------------------------------------------------------------
  * 役割の住み分け:
- *   - 枠線   = 期日の緊急度（超過=赤 / 2日以内=黄 / それ以外=通常）
- *   - バッジ = ステータス（未着手=赤 / 進行中=黄 / 確認待ち=緑 / 完了=グレー）
- * ステータス色は枠線に使わないこと。緊急度の色はバッジに使わないこと。
+ *   - 枠線（カード） = 期日の緊急度（超過=赤 / 2日以内=黄 / それ以外=通常）
+ *   - ステータスの Select = ステータス（未着手=赤 / 進行中=黄 / 確認待ち=緑 / 完了=グレー）
+ *   - バッジ = 優先度（高=赤 / 中=アンバー / 低=グレー）
+ * ステータス色はカードの枠線に使わないこと。緊急度の色は Select・バッジに使わないこと。
  *
  * 緊急度の判定は lib/tasks/filters.ts（毎朝のリマインド通知と同じ定義）に
  * 委譲しており、ここで新しい期日ロジックは作らない。
@@ -13,7 +14,7 @@
  * =============================================================================
  */
 import { isDueSoon, isOverdue } from "@/lib/tasks/filters";
-import type { Task, TaskStatus } from "@/types";
+import type { Task, TaskPriority, TaskStatus } from "@/types";
 
 // ---------------------------------------------------------------------------
 // 期日の緊急度（枠線）
@@ -27,10 +28,10 @@ export function dueUrgency(task: Task, from = new Date()): DueUrgency {
   return "normal";
 }
 
-/** カードの枠線クラス。normal は既定の枠線のまま。 */
+/** カードの枠線クラス（太さ 1px = 通常の枠線と同じ）。normal は既定の枠線のまま。 */
 export const DUE_BORDER_CLASSES: Record<DueUrgency, string> = {
-  overdue: "border-2 border-red-500",
-  due_soon: "border-2 border-yellow-400",
+  overdue: "border border-red-500",
+  due_soon: "border border-yellow-400",
   normal: "",
 };
 
@@ -49,11 +50,33 @@ export const DUE_HEADING_CLASSES: Record<DueUrgency, string> = {
 };
 
 // ---------------------------------------------------------------------------
-// ステータス（バッジ / ラベルのみに使用）
+// ステータス（ステータス変更 Select の配色に使用）
 // ---------------------------------------------------------------------------
-export const STATUS_BADGE_CLASSES: Record<TaskStatus, string> = {
+
+/** Select のトリガー（閉じた状態）用。背景 + 文字色でステータスを表す。 */
+export const STATUS_SELECT_TRIGGER_CLASSES: Record<TaskStatus, string> = {
   not_started: "border-transparent bg-red-100 text-red-800",
   in_progress: "border-transparent bg-yellow-100 text-yellow-800",
   in_review: "border-transparent bg-green-100 text-green-800",
   done: "border-transparent bg-slate-200 text-slate-600",
+};
+
+/**
+ * Select のドロップダウン項目用。
+ * ハイライト（focus）時も同系色を維持し、色の区別が消えないようにする。
+ */
+export const STATUS_SELECT_ITEM_CLASSES: Record<TaskStatus, string> = {
+  not_started: "text-red-700 focus:bg-red-100 focus:text-red-800",
+  in_progress: "text-yellow-700 focus:bg-yellow-100 focus:text-yellow-800",
+  in_review: "text-green-700 focus:bg-green-100 focus:text-green-800",
+  done: "text-slate-500 focus:bg-slate-200 focus:text-slate-700",
+};
+
+// ---------------------------------------------------------------------------
+// 優先度（バッジに使用）
+// ---------------------------------------------------------------------------
+export const PRIORITY_BADGE_CLASSES: Record<TaskPriority, string> = {
+  high: "border-transparent bg-red-100 text-red-800",
+  mid: "border-transparent bg-amber-100 text-amber-800",
+  low: "border-transparent bg-slate-100 text-slate-700",
 };

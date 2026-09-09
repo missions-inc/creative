@@ -22,7 +22,12 @@ import {
 } from "@/components/ui/select";
 import { useClients, useProjects, useTasks, useUsers } from "@/hooks/useCollections";
 import { formatDateTime } from "@/lib/date";
-import { STATUS_BADGE_CLASSES } from "@/lib/tasks/colors";
+import { cn } from "@/lib/utils";
+import {
+  PRIORITY_BADGE_CLASSES,
+  STATUS_SELECT_ITEM_CLASSES,
+  STATUS_SELECT_TRIGGER_CLASSES,
+} from "@/lib/tasks/colors";
 import { setTaskDeleted, updateTask, updateTaskStatus } from "@/lib/firebase/mutations";
 import {
   TASK_PRIORITY_LABELS,
@@ -94,10 +99,6 @@ export default function TaskDetailPage() {
             </p>
             <h1 className="flex flex-wrap items-center gap-2 text-2xl font-bold">
               {task.title}
-              {/* バッジ = ステータス（lib/tasks/colors.ts の統一色） */}
-              <Badge className={STATUS_BADGE_CLASSES[task.status]}>
-                {TASK_STATUS_LABELS[task.status]}
-              </Badge>
               {task.isDeleted ? <Badge variant="secondary">削除済み</Badge> : null}
             </h1>
           </div>
@@ -128,12 +129,22 @@ export default function TaskDetailPage() {
               value={task.status}
               onValueChange={(v) => updateTaskStatus(task.id, v as TaskStatus)}
             >
-              <SelectTrigger className="sm:w-48">
+              {/* Select 自体をステータス色で塗る（lib/tasks/colors.ts の統一色） */}
+              <SelectTrigger
+                className={cn(
+                  "sm:w-48",
+                  STATUS_SELECT_TRIGGER_CLASSES[task.status],
+                )}
+              >
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
                 {TASK_STATUSES.map((s) => (
-                  <SelectItem key={s} value={s}>
+                  <SelectItem
+                    key={s}
+                    value={s}
+                    className={STATUS_SELECT_ITEM_CLASSES[s]}
+                  >
                     {TASK_STATUS_LABELS[s]}
                   </SelectItem>
                 ))}
@@ -142,7 +153,9 @@ export default function TaskDetailPage() {
           </div>
 
           <Field label="優先度">
-            <Badge variant="outline">{TASK_PRIORITY_LABELS[task.priority]}</Badge>
+            <Badge className={PRIORITY_BADGE_CLASSES[task.priority]}>
+              {TASK_PRIORITY_LABELS[task.priority]}
+            </Badge>
           </Field>
 
           <Field label="期日">{formatDateTime(task.dueAt)}</Field>
