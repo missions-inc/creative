@@ -6,6 +6,7 @@ import {
   byDueThenPriority,
   isAssignedTo,
   isDueSoon,
+  isDueToday,
   isIncomplete,
   isOverdue,
 } from "@/lib/tasks/filters";
@@ -81,6 +82,25 @@ describe("期日間近の判定（カレンダー日基準）", () => {
   });
 });
 
+describe("本日期日の判定（isDueToday）", () => {
+  it("同じカレンダー日なら時刻によらず true", () => {
+    expect(isDueToday(task({ dueAt: due(2026, 9, 1, 0) }), FROM)).toBe(true);
+    expect(isDueToday(task({ dueAt: due(2026, 9, 1, 9) }), FROM)).toBe(true);
+    expect(isDueToday(task({ dueAt: due(2026, 9, 1, 23) }), FROM)).toBe(true);
+  });
+
+  it("前日・翌日は false（期日超過 / 1日後は別分類）", () => {
+    expect(isDueToday(task({ dueAt: due(2026, 8, 31, 23) }), FROM)).toBe(false);
+    expect(isDueToday(task({ dueAt: due(2026, 9, 2) }), FROM)).toBe(false);
+  });
+
+  it("完了・削除済み・期日なしは false", () => {
+    expect(isDueToday(task({ dueAt: due(2026, 9, 1), status: "done" }), FROM)).toBe(false);
+    expect(isDueToday(task({ dueAt: due(2026, 9, 1), isDeleted: true }), FROM)).toBe(false);
+    expect(isDueToday(task({ dueAt: null }), FROM)).toBe(false);
+  });
+});
+
 describe("マイタスク", () => {
   it("assignees に含まれていれば true", () => {
     expect(isAssignedTo(task({ assignees: ["me", "other"] }), "me")).toBe(true);
@@ -116,6 +136,24 @@ describe("統一並び順 byDueThenPriority（期日昇順 → 優先度 高→�
       "h",
       "m",
       "l",
+    ]);
+  });
+
+  it("同じ日なら時刻が遅くても優先度が優先（カレンダー日基準）", () => {
+    const early = task({ id: "e", dueAt: due(2026, 9, 3, 9), priority: "low" });
+    const late = task({ id: "l", dueAt: due(2026, 9, 3, 18), priority: "high" });
+    expect([early, late].sort(byDueThenPriority).map((t) => t.id)).toEqual([
+      "l",
+      "e",
+    ]);
+  });
+
+  it("同じ日・同じ優先度なら時刻が早い順", () => {
+    const later = task({ id: "b", dueAt: due(2026, 9, 3, 18) });
+    const earlier = task({ id: "a", dueAt: due(2026, 9, 3, 9) });
+    expect([later, earlier].sort(byDueThenPriority).map((t) => t.id)).toEqual([
+      "a",
+      "b",
     ]);
   });
 

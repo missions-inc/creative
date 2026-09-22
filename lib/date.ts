@@ -36,6 +36,20 @@ export function formatDate(ts: Timestamp | null | undefined): string {
   return `${d.getFullYear()}/${pad(d.getMonth() + 1)}/${pad(d.getDate())}`;
 }
 
+/**
+ * 一覧表示用の短い日付（例: 9/18）。
+ * 年をまたぐ期日だけ年を添える（例: 2027/1/15）。一覧の横幅を節約するため時刻は出さない。
+ */
+export function formatDateShort(
+  ts: Timestamp | null | undefined,
+  from = new Date(),
+): string {
+  if (!ts) return "—";
+  const d = ts.toDate();
+  const md = `${d.getMonth() + 1}/${d.getDate()}`;
+  return d.getFullYear() === from.getFullYear() ? md : `${d.getFullYear()}/${md}`;
+}
+
 /** カレンダー日基準での日数差（相手 - 今日）。期日間近判定に使う。 */
 export function daysUntil(ts: Timestamp | null | undefined, from = new Date()): number | null {
   if (!ts) return null;

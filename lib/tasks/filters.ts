@@ -39,6 +39,12 @@ export function isDueSoon(task: Task, from = new Date()): boolean {
   return d !== null && d >= 0 && d <= DUE_SOON_WINDOW_DAYS;
 }
 
+/** 本日期日: 未完了かつ期日が当日（カレンダー日基準）。 */
+export function isDueToday(task: Task, from = new Date()): boolean {
+  if (!isIncomplete(task)) return false;
+  return daysUntil(task.dueAt, from) === 0;
+}
+
 /** 期日超過: 未完了かつ期日が過去。 */
 export function isOverdue(task: Task, from = new Date()): boolean {
   if (!isIncomplete(task)) return false;
@@ -64,19 +70,30 @@ export function isAssignedTo(task: Task, uid: string): boolean {
 /** 優先度の並び順（小さいほど先）。 */
 const PRIORITY_ORDER: Record<TaskPriority, number> = { high: 0, mid: 1, low: 2 };
 
+/** 期日のカレンダー日（0:00）をミリ秒で返す。期日なしは末尾に回るよう最大値。 */
+function dueDayKey(task: Task): number {
+  const ts = task.dueAt;
+  if (!ts) return Number.MAX_SAFE_INTEGER;
+  const d = ts.toDate();
+  return new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+}
+
 /**
  * タスク一覧の統一並び順（全画面共通の唯一の定義）:
- *   第1キー: 期日の昇順（近い順）。期日なしは末尾。
- *   第2キー: 優先度 高 → 中 → 低。
- *   第3キー: タイトル順（表示を安定させるため）。
- * ダッシュボードのセクション分け（超過 / 2日以内 / それ以外）の中でもこの順で並べる。
+ *   第1キー: 期日の昇順（カレンダー日基準・近い順）。期日なしは末尾。
+ *   第2キー: 優先度 高 → 中 → 低（同じ日なら時刻によらず優先度が優先）。
+ *   第3キー: 期日の時刻順 → タイトル順（表示を安定させるため）。
+ * ダッシュボードのセクション分け（超過 / 本日 / 1〜2日 / それ以外）の中でもこの順で並べる。
  */
 export function byDueThenPriority(a: Task, b: Task): number {
-  const av = a.dueAt?.toMillis() ?? Number.MAX_SAFE_INTEGER;
-  const bv = b.dueAt?.toMillis() ?? Number.MAX_SAFE_INTEGER;
-  if (av !== bv) return av - bv;
+  const ad = dueDayKey(a);
+  const bd = dueDayKey(b);
+  if (ad !== bd) return ad - bd;
   const ap = PRIORITY_ORDER[a.priority];
   const bp = PRIORITY_ORDER[b.priority];
   if (ap !== bp) return ap - bp;
+  const at = a.dueAt?.toMillis() ?? Number.MAX_SAFE_INTEGER;
+  const bt = b.dueAt?.toMillis() ?? Number.MAX_SAFE_INTEGER;
+  if (at !== bt) return at - bt;
   return a.title.localeCompare(b.title);
 }

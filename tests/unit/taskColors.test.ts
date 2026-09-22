@@ -4,7 +4,9 @@ import { Timestamp } from "firebase/firestore";
 import {
   DUE_BORDER_CLASSES,
   DUE_HEADING_CLASSES,
+  DUE_SECTION_LABELS,
   DUE_TEXT_CLASSES,
+  DUE_URGENCIES,
   PRIORITY_BADGE_CLASSES,
   STATUS_SELECT_ITEM_CLASSES,
   STATUS_SELECT_TRIGGER_CLASSES,
@@ -35,13 +37,19 @@ function task(over: Partial<Task> = {}): Task {
 }
 const due = (d: number, m: number) => Timestamp.fromDate(new Date(2026, m - 1, d, 12));
 
-describe("dueUrgency（filters.ts の判定に委譲）", () => {
-  it("超過 / 2日以内 / それ以外", () => {
+describe("dueUrgency（filters.ts の判定に委譲・4分類）", () => {
+  it("超過 / 本日 / 1〜2日 / それ以外", () => {
     expect(dueUrgency(task({ dueAt: due(8, 9) }), FROM)).toBe("overdue");
-    expect(dueUrgency(task({ dueAt: due(9, 9) }), FROM)).toBe("due_soon"); // 当日
-    expect(dueUrgency(task({ dueAt: due(11, 9) }), FROM)).toBe("due_soon"); // 2日後
+    expect(dueUrgency(task({ dueAt: due(9, 9) }), FROM)).toBe("due_today"); // 当日
+    expect(dueUrgency(task({ dueAt: due(10, 9) }), FROM)).toBe("due_near"); // 1日後
+    expect(dueUrgency(task({ dueAt: due(11, 9) }), FROM)).toBe("due_near"); // 2日後
     expect(dueUrgency(task({ dueAt: due(12, 9) }), FROM)).toBe("normal"); // 3日後
     expect(dueUrgency(task({ dueAt: null }), FROM)).toBe("normal");
+  });
+
+  it("本日期日は時刻が基準より前でも due_today（カレンダー日基準）", () => {
+    const morning = Timestamp.fromDate(new Date(2026, 8, 9, 1));
+    expect(dueUrgency(task({ dueAt: morning }), FROM)).toBe("due_today");
   });
 
   it("完了タスクは期日超過でも normal（緊急度は未完了のみの概念）", () => {
@@ -63,12 +71,24 @@ describe("色クラスの定義漏れがない", () => {
     }
   });
 
-  it("枠線・テキスト・見出しの緊急度クラスが揃っている", () => {
-    for (const u of ["overdue", "due_soon", "normal"] as const) {
-      expect(DUE_BORDER_CLASSES[u]).toBeDefined();
-      expect(DUE_TEXT_CLASSES[u]).toBeDefined();
-      expect(DUE_HEADING_CLASSES[u]).toBeDefined();
+  it("枠線・テキスト・見出し・ラベルが全4分類ぶん揃っている", () => {
+    expect(DUE_URGENCIES).toEqual([
+      "overdue",
+      "due_today",
+      "due_near",
+      "normal",
+    ]);
+    for (const u of DUE_URGENCIES) {
+      expect(DUE_BORDER_CLASSES[u], u).toBeDefined();
+      expect(DUE_TEXT_CLASSES[u], u).toBeDefined();
+      expect(DUE_HEADING_CLASSES[u], u).toBeDefined();
+      expect(DUE_SECTION_LABELS[u], u).toBeTruthy();
     }
+  });
+
+  it("4分類の枠線は互いに異なる色（本日=黄 / 1〜2日=濃いグレーが見分けられる）", () => {
+    const borders = DUE_URGENCIES.map((u) => DUE_BORDER_CLASSES[u]);
+    expect(new Set(borders).size).toBe(borders.length);
   });
 
   it("役割の住み分け: ステータス色は枠線に使わない（枠線クラスに bg- を含めない）", () => {

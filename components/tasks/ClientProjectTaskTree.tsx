@@ -129,6 +129,7 @@ export function ClientProjectTaskTree({
                       tasks={projectTasks}
                       users={users}
                       emptyLabel="タスクはありません。"
+                      compactEmpty
                     />
                   </div>
                 </div>

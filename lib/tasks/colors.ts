@@ -3,7 +3,8 @@
  * タスクの色分けルール（アプリ全体で共有する唯一の定義）
  * -----------------------------------------------------------------------------
  * 役割の住み分け:
- *   - 枠線（カード） = 期日の緊急度（超過=赤 / 2日以内=黄 / それ以外=通常）
+ *   - 枠線（カード）= 期日の緊急度
+ *     （超過=赤 / 本日=黄 / 1〜2日=濃いめのグレー / それ以外=通常のグレー）
  *   - ステータスの Select = ステータス（未着手=赤 / 進行中=黄 / 確認待ち=緑 / 完了=グレー）
  *   - バッジ = 優先度（高=赤 / 中=アンバー / 低=グレー）
  * ステータス色はカードの枠線に使わないこと。緊急度の色は Select・バッジに使わないこと。
@@ -13,40 +14,71 @@
  * 色だけに意味を持たせず、必ずテキストラベルを併記すること（色覚特性への配慮）。
  * =============================================================================
  */
-import { isDueSoon, isOverdue } from "@/lib/tasks/filters";
+import { isDueSoon, isDueToday, isOverdue } from "@/lib/tasks/filters";
 import type { Task, TaskPriority, TaskStatus } from "@/types";
 
 // ---------------------------------------------------------------------------
-// 期日の緊急度（枠線）
+// 期日の緊急度（枠線・セクション見出し）
 // ---------------------------------------------------------------------------
-export type DueUrgency = "overdue" | "due_soon" | "normal";
+/**
+ * 期日の 4 分類。
+ *   overdue   : 期日超過
+ *   due_today : 本日が期日
+ *   due_near  : 期日まで 1〜2 日
+ *   normal    : それ以外（3日以上先・期日なし・完了）
+ */
+export type DueUrgency = "overdue" | "due_today" | "due_near" | "normal";
 
-/** タスクの緊急度。完了・削除済み・期日なしは normal（filters.ts の定義に従う）。 */
+/** 表示順（上から）。セクションの並びもこの順に従う。 */
+export const DUE_URGENCIES: DueUrgency[] = [
+  "overdue",
+  "due_today",
+  "due_near",
+  "normal",
+];
+
+/**
+ * タスクの緊急度。完了・削除済み・期日なしは normal。
+ * 判定は lib/tasks/filters.ts（毎朝のリマインド通知と同じ定義）に委譲する。
+ * due_near は「isDueSoon（0〜2日）かつ本日ではない」= 1〜2日 として導出する。
+ */
 export function dueUrgency(task: Task, from = new Date()): DueUrgency {
   if (isOverdue(task, from)) return "overdue";
-  if (isDueSoon(task, from)) return "due_soon";
+  if (isDueToday(task, from)) return "due_today";
+  if (isDueSoon(task, from)) return "due_near";
   return "normal";
 }
 
-/** カードの枠線クラス（太さ 1px = 通常の枠線と同じ）。normal は既定の枠線のまま。 */
+/** カードの枠線クラス（太さ 1px = 通常の枠線と同じ）。normal は既定の枠線（グレー）のまま。 */
 export const DUE_BORDER_CLASSES: Record<DueUrgency, string> = {
   overdue: "border border-red-500",
-  due_soon: "border border-yellow-400",
+  due_today: "border border-yellow-400",
+  due_near: "border border-slate-400",
   normal: "",
 };
 
 /** 期日テキストの強調クラス（枠線と同じ意味・同系色）。 */
 export const DUE_TEXT_CLASSES: Record<DueUrgency, string> = {
   overdue: "text-red-600 font-medium",
-  due_soon: "text-yellow-700 font-medium",
+  due_today: "text-yellow-700 font-medium",
+  due_near: "text-slate-600 font-medium",
   normal: "",
 };
 
-/** セクション見出し用（ダッシュボードの「期日超過」「2日以内」）。 */
+/** セクション見出し用（ダッシュボードの「期日超過」「本日期日」など）。 */
 export const DUE_HEADING_CLASSES: Record<DueUrgency, string> = {
   overdue: "text-red-600",
-  due_soon: "text-yellow-700",
+  due_today: "text-yellow-700",
+  due_near: "text-slate-600",
   normal: "text-muted-foreground",
+};
+
+/** セクション見出しのラベル（ダッシュボード共通）。 */
+export const DUE_SECTION_LABELS: Record<DueUrgency, string> = {
+  overdue: "期日超過",
+  due_today: "本日期日",
+  due_near: "期日まで1〜2日",
+  normal: "それ以外",
 };
 
 // ---------------------------------------------------------------------------
